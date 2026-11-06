@@ -53,13 +53,13 @@ The only shared contract is the `state` shape and the socket events. Agree on bo
 | Person | Owns | Deliverables |
 | --- | --- | --- |
 | **Evan** | Frontend + design | Tailwind tokens. All 6 screens wired to `state` |
-| **Ibrahim** | Server + realtime | Express + Socket.IO. Events `join`, `adhan`, `free`, `message`, `reset`. Brother/sister groups, 30-min expiry, "Trigger adhan" route |
-| **Ali** | Replit + demo engine + pitch | Replit setup + deploy + QR code. `adhan` times. Seed data: 8 profiles, 5 UCSD spots. `?demo=1` timeline + Reset. Adhan audio. Slides, script, judge-feedback log (consult ≥ 2 judges) |
+| **Ibrahim** | Server + realtime + demo | Express + Socket.IO. Events `join`, `adhan`, `free`, `message`, `reset`. Brother/sister groups, 30-min expiry, "Trigger adhan" route. `?demo=1` scripted timeline + Reset (bots join, timed messages) using Ali's seed data |
+| **Ali** | Replit + content + pitch | Replit setup + deploy + QR code. `adhan` times. Seed data: 8 profiles, 5 UCSD spots. Adhan audio. Slides, script, judge-feedback log (consult ≥ 2 judges) |
 
 **Timeline**
 
 1. **2:45–3:00, all:** agree on the contract. Ali creates the Replit and imports this repo.
-2. **3:00–4:30:** solo builds (Evan: screens on mock state · Ibrahim: sockets · Ali: demo script + seed data).
+2. **3:00–4:30:** solo builds (Evan: screens on mock state · Ibrahim: sockets + demo script · Ali: Replit + seed data).
 3. **4:30:** wire the frontend to sockets. Ali gets judge #1's feedback.
 4. **4:30–6:00:** full live loop on 3 phones. Ali gets judge #2's feedback. Evan polishes the animations.
 5. **6:00–6:30:** freeze, deploy, rehearse 3 times, record a backup video.
