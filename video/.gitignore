@@ -1,0 +1,7 @@
+# Raw footage and renders are big: keep them out of git (share via AirDrop/Drive).
+raw/**/*
+!raw/**/.gitkeep
+music/*
+!music/.gitkeep
+exports/*
+!exports/.gitkeep

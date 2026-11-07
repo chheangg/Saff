@@ -1,0 +1,20 @@
+{
+  "name": "Saff",
+  "tagline": "Pray together. Never alone.",
+  "one_liner": "When the adhan goes off, Saff finds Muslims on your campus who are free to pray with you.",
+  "event": "MTC x Replit x Manara West Buildathon · Deen & Dunya track",
+  "fonts": { "display": "Geist", "body": "Geist", "label": "Geist Mono" },
+  "colors": {
+    "ink": "#0B0B0F",
+    "canvas_light": "#F4F4F2",
+    "canvas_dark": "#0B0B0F",
+    "surface_dark": "#17171C",
+    "brand_indigo": "#6366F1",
+    "free_emerald": "#10B981",
+    "streak_orange": "#F97316",
+    "hero_gradient": ["#1E1B4B", "#4338CA", "#7C3AED"]
+  },
+  "mascot": ["assets/moon-wave.png", "assets/moon-sleepy.png"],
+  "screens": "assets/screens/*.png (exported from design/saff.pen at 3x)",
+  "never": ["Duolingo owl or any other brand's characters", "mixed brothers/sisters in one group", "stock photos of people praying"]
+}
