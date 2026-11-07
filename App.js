@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
 import { Store, initialState, reducer, startAdhan } from './src/store';
+import { connectLive, isLive, mirror, rejoin } from './src/live';
 import Onboarding from './src/screens/Onboarding';
 import Home from './src/screens/Home';
 import Takeover from './src/screens/Takeover';
@@ -20,17 +21,23 @@ Notifications.setNotificationHandler({
 });
 
 export default function App() {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, rawDispatch] = useReducer(reducer, initialState);
+  // Every action goes to the reducer; the user's own actions are mirrored to the server in live mode.
+  const dispatch = useMemo(() => (a) => { rawDispatch(a); mirror(a); }, []);
   const store = useMemo(() => ({ state, dispatch }), [state]);
-  const gender = useRef(state.me.gender);
-  gender.current = state.me.gender;
+  const meRef = useRef(state.me);
+  meRef.current = state.me;
+
+  useEffect(() => connectLive(rawDispatch, () => meRef.current), []);
+  useEffect(() => { if (state.onboarded) rejoin(state.me); }, [state.onboarded, state.me.gender]);
 
   useEffect(() => {
     Notifications.requestPermissionsAsync().catch(() => {});
     // Tapping a real (scheduled) prayer notification opens the adhan flow.
     const sub = Notifications.addNotificationResponseReceivedListener((res) => {
       const prayer = res.notification.request.content.data?.prayer;
-      if (prayer) startAdhan(dispatch, prayer, gender.current);
+      // In live mode the server drives the group; offline, bots fill it in.
+      if (prayer) startAdhan(dispatch, prayer, meRef.current.gender, !isLive);
     });
     return () => sub.remove();
   }, []);

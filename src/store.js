@@ -47,6 +47,10 @@ export function reducer(s, a) {
     }
     case 'CLOSE_STREAK':
       return { ...s, streakSheet: null };
+    case 'GROUP':
+      return { ...s, group: a.group };
+    case 'ME':
+      return { ...s, me: { ...s.me, ...a.me } };
     case 'PROFILE':
       return { ...s, profile: a.user };
     case 'RESET':
@@ -61,11 +65,14 @@ export const useStore = () => useContext(Store);
 
 // ---------- Demo engine (deterministic, replayable) ----------
 let timers = [];
+let demoActive = false;
+export const isDemoActive = () => demoActive;
 const later = (ms, fn) => timers.push(setTimeout(fn, ms));
 
 export function stopDemo() {
   timers.forEach(clearTimeout);
   timers = [];
+  demoActive = false;
   Notifications.cancelAllScheduledNotificationsAsync().catch(() => {});
 }
 
@@ -81,6 +88,7 @@ function adhanContent(prayer, gender) {
 export function playDemo(dispatch, me, delay = 3000) {
   stopDemo();
   dispatch({ type: 'RESET' });
+  demoActive = true;
   const p = currentPrayer();
   const prayer = { key: p.key, label: p.label, timeLabel: fmtTime(p.time) };
   Notifications.scheduleNotificationAsync({
@@ -90,17 +98,21 @@ export function playDemo(dispatch, me, delay = 3000) {
   later(delay, () => startAdhan(dispatch, prayer, me.gender));
 }
 
-export function startAdhan(dispatch, prayer, gender) {
+export function startAdhan(dispatch, prayer, gender, withBots = true) {
   dispatch({ type: 'ADHAN', prayer });
+  if (!withBots) return;
+  demoActive = true;
   BOTS[gender].forEach((bot, i) => later(JOIN_TIMES[i], () => dispatch({ type: 'JOIN', user: bot })));
 }
 
 export function playChat(dispatch, gender) {
+  if (!demoActive) return;
   const bots = BOTS[gender];
   CHAT_SCRIPT.forEach(([i, text], n) => later(1200 + n * 2600, () => dispatch({ type: 'MESSAGE', userId: bots[i].id, text })));
 }
 
 export function botReply(dispatch, gender) {
+  if (!demoActive) return;
   const [i, text] = REPLY;
   later(1800, () => dispatch({ type: 'MESSAGE', userId: BOTS[gender][i].id, text }));
 }
