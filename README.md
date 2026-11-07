@@ -40,6 +40,8 @@ A streak counts consecutive days on which you prayed at least one prayer in cong
 
 ## Run it
 
+Teammates: see [SETUP.md](SETUP.md) to get it on your phone + who owns which files.
+
 ```bash
 npm install
 npx expo start          # scan the QR code with Expo Go (iOS camera / Android Expo Go app)
