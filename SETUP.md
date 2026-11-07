@@ -52,6 +52,26 @@ npx expo start --tunnel     # campus Wi-Fi blocks LAN, so use --tunnel
 
 If the tunnel is blocked on your laptop (like Ali's), skip it. Push your branch and ping Evan to publish, then reopen Expo Go from Option 1. Or test in a browser with `npx expo start --web`.
 
+## The backend (live mode)
+
+The server is live on Replit at **https://saff-alimran13.replit.app**. It's always on and fires the adhan at real San Diego prayer times. Open the link to see today's times and how many people are connected.
+
+**Use it locally:** run `cp .env.example .env` and restart Expo. The app then joins real groups with everyone else instead of running the scripted demo. To go back to offline demo mode, delete `.env`. `.env` is gitignored, so each person makes their own.
+
+**Use it in the published apps (Evan):** `.env` isn't uploaded when publishing, so set `EXPO_PUBLIC_SERVER_URL=https://saff-alimran13.replit.app` once in each place, then republish:
+- Expo: expo.dev, project **Environment variables**, **production** environment (that's what `publish:app` uses)
+- Vercel: project **Settings → Environment Variables**, **Production**
+
+**Fire an adhan now (for testing or the demo):**
+
+```bash
+curl -X POST "https://saff-alimran13.replit.app/adhan?key=<ADMIN_KEY>" -H 'content-type: application/json' -d '{"prayer":"asr"}'
+```
+
+Ask Ali for `ADMIN_KEY`. It's a Replit Secret and never goes in git. Every phone with the app open gets the adhan popup.
+
+**Changing the server:** edit `server/`, push, then Ali pulls and republishes on Replit. Redeploying wipes saved users and streaks (`server/data.json`).
+
 ## The contract
 
 | Person | Owns | Files |
