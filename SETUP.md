@@ -4,7 +4,8 @@
 
 1. Install **Expo Go** from the App Store / Play Store.
 2. Open this in Expo Go (on iPhone, paste it into Safari or scan the QR code Evan shares):
-   `exp://c-evanlyy168-6s543z-mw5nlzfdhncis941.on.expo.app`
+   `exp://c-evanlyy168-6s543z-mw5nzzwjvvg2osag.on.expo.app`
+   <img src="assets/expo-go-qr.png" width="200" alt="QR code to open Saff in Expo Go">
 3. Wait 30–60s on first load. Works on campus Wi-Fi and cellular.
 
 This shows **Evan's laptop's code**, so your edits won't appear. To work on the code, use the next section.
