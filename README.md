@@ -50,17 +50,11 @@ npx expo start --tunnel # if your phone is on a different network
 
 **Demo mode:** long-press the **Saff** wordmark on Home and tap **Play demo**. After 3 seconds, a real notification fires (lock the phone to catch the banner), the adhan screen opens, 4 seeded users join, and the chat plays a script. **Reset** replays it. Seed content lives in `src/data.js`.
 
-**Live mode (real groups across phones):**
+**Live mode (real groups across phones):** the server is live at https://saff-alimran13.replit.app. Run `cp .env.example .env` and restart Expo. See **The backend** in [SETUP.md](SETUP.md) for publishing, firing a test adhan, and the event contract. Demo mode still works while live mode is on.
 
-```bash
-cd server && npm install && npm start      # :4000, fires the adhan at real UCSD prayer times
-echo "EXPO_PUBLIC_SERVER_URL=http://<your-laptop-ip>:4000" > .env   # in the repo root, then restart expo
-curl -X POST "http://localhost:4000/adhan?key=saff" -H 'content-type: application/json' -d '{"prayer":"asr"}'   # trigger an adhan now
-```
+**Run the server on your laptop instead:** `npm run server` (port 4000, admin key `saff` unless `ADMIN_KEY` is set), then point `.env` at your laptop's Wi-Fi IP.
 
-**Deploy the server on Replit:** Import this repo from GitHub, add a Secret `ADMIN_KEY`, and click Deploy → **Reserved VM** (not Autoscale, because state is in memory; `server/data.json` resets on each redeploy). `.replit` already has the build and run commands set. Then set `EXPO_PUBLIC_SERVER_URL=https://<your-app>.replit.app` in `.env.local`.
-
-The server is in-memory: Socket.IO events `join`, `free`, `message`, `prayed` → `adhan`, `group`, `me`. Brothers and sisters get separate groups, and streaks go up once per Pacific day. Set `ADMIN_KEY` in production. Demo mode still works while live mode is on.
+**Deploy the server on Replit:** Import this repo from GitHub, add a Secret `ADMIN_KEY`, and click Deploy → **Reserved VM** (not Autoscale, because state is in memory; `server/data.json` resets on each redeploy).
 
 ## Tech stack: Expo app + 60-second video
 

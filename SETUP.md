@@ -77,8 +77,8 @@ Ask Ali for `ADMIN_KEY`. It's a Replit Secret and never goes in git. Every phone
 | Person | Owns | Files |
 | --- | --- | --- |
 | **Ibrahim** | Frontend + demo | `src/TabBar.js`, `src/screens/Takeover.js`, `ChatTab.js`, `Chat.js`, `Matching.js`, `Food.js`, `Profile.js`, `Sheets.js`, `src/data.js` (demo pacing: `JOIN_TIMES`, `CHAT_SCRIPT`). Records the 60s video. |
-| **Evan** | Frontend + backend | `src/screens/Onboarding.js`, `Home.js`, `src/live.js`, `src/persist.js`, `App.js`, publishing. |
-| **Ali** | Backend + deploy | `server/`. Puts the server online and shares the URL for `EXPO_PUBLIC_SERVER_URL`. |
+| **Evan** | Frontend + app side of live mode | `src/screens/Onboarding.js`, `Home.js`, `src/live.js` (socket client), `src/persist.js`, `App.js`, publishing (Expo + Vercel). |
+| **Ali** | Server + deploy | `server/`, `.replit`, the Replit deployment and its `ADMIN_KEY`. Server is live at https://saff-alimran13.replit.app. |
 | Shared, ask first | | `src/store.js`, `src/ui.js`, `src/theme.js`, `app.json`, `package.json` |
 
 **State and actions** (`src/store.js`): screens read `state` and call `dispatch`.
@@ -90,13 +90,27 @@ state = {
   adhan,                   // { key:'asr', label:'Asr', timeLabel:'2:31 PM', at } or null
   response,                // null | 'free' | 'no' | 'prayed'
   group: { members, messages: [{ id, userId, text, at }], expiresAt, spot, spotStats },
-  streakSheet, profile, network,   // network: { prayers, campuses }
+  chatOpen, streakSheet, profile, network,   // network: { prayers, campuses }
 }
 // actions: ONBOARD · HYDRATE · TAB · ADHAN · RESPOND · JOIN · OPEN_CHAT · MESSAGE · PIN_SPOT
 //          PRAYED · CLOSE_STREAK · PROFILE · GROUP · ME · NETWORK · RESET
 ```
 
-**Server events** (live mode, `server/index.js`): the client sends `join`, `free`, `message`, `spot`, `prayed`, and the server sends `adhan`, `group`, `me`, `network`.
+**Server events** (live mode): `src/live.js` (Evan) ↔ `server/index.js` (Ali). If you change an event, change both sides in the same PR, or ping the other person.
+
+Groups are per **campus + gender** (for example `ucsd:brother`). An adhan opens a fresh group that lasts 30 min.
+
+| Direction | Event | Payload |
+| --- | --- | --- |
+| app → server | `join` | `{ id, name, gender: 'brother'\|'sister', campus: 'ucsd'\|'sdsu'\|'mesa'\|'usd', major, year, linkedin, instagram, streak, prayedToday }`. Sent on connect, after onboarding, and when gender changes; `id` is the device id from `persist.js` |
+| app → server | `free` | none. Ignored unless an adhan fired in the last 30 min |
+| app → server | `message` | `text` (string, max 500). Only group members can post |
+| app → server | `spot` | `spotId` (string, a spot id from the campus's `spots` in `src/data.js`) |
+| app → server | `prayed` | none. +1 streak once per Pacific day |
+| server → app | `adhan` | `{ key: 'asr', label: 'Asr', timeLabel: '2:31 PM', at }` |
+| server → app | `group` | `{ members: [user], messages: [{ id, userId, text, at }], expiresAt, spot, spotStats: { spotId: { count, last? } } }` |
+| server → app | `me` | your user: `{ id, name, gender, campus, major, year, linkedin, instagram, streak, prayedToday }` |
+| server → app | `network` | `{ prayers, campuses }` today across all campuses |
 
 **Design:** black, white, and grays, with one green accent `#06C167`. One primary button per screen. Use the components in `src/ui.js`.
 
