@@ -12,6 +12,7 @@ import { Coordinates, CalculationMethod, PrayerTimes } from 'adhan';
 const PORT = process.env.PORT || 4000;
 const DB_FILE = process.env.DB_FILE || new URL('./data.json', import.meta.url).pathname;
 const ADMIN_KEY = process.env.ADMIN_KEY || 'saff';
+const PUSH_URL = process.env.PUSH_URL || 'https://exp.host/--/api/v2/push/send'; // tests point this at a mock
 const TZ = 'America/Los_Angeles';
 const GROUP_MS = 30 * 60 * 1000;
 const COORDS = new Coordinates(32.8801, -117.234); // all Manara campuses are in San Diego
@@ -118,13 +119,22 @@ async function pushAdhan(a) {
       data: { prayer: { key: a.key, label: a.label, timeLabel: a.timeLabel } },
     }));
   for (let i = 0; i < msgs.length; i += 100) {
+    const batch = msgs.slice(i, i + 100);
     try {
-      const r = await fetch('https://exp.host/--/api/v2/push/send', {
+      const r = await fetch(PUSH_URL, {
         method: 'POST',
         headers: { 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify(msgs.slice(i, i + 100)),
+        body: JSON.stringify(batch),
+        signal: AbortSignal.timeout(10_000), // never leave the admin page hanging
       });
-      if (!r.ok) console.error('[push] failed', r.status, await r.text());
+      if (!r.ok) { console.error('[push] failed', r.status, await r.text()); continue; }
+      // Tickets come back in order. Forget tokens Expo says are dead (app deleted / alerts off).
+      const { data = [] } = await r.json().catch(() => ({}));
+      data.forEach((t, j) => {
+        if (t?.details?.error !== 'DeviceNotRegistered') return;
+        for (const u of users.values()) if (u.pushToken === batch[j].to) u.pushToken = null;
+      });
+      save();
     } catch (e) {
       console.error('[push] error', e.message);
     }
@@ -184,6 +194,10 @@ io.on('connection', (socket) => {
       // Expo push token from the app; keep the last good one if this join has none.
       pushToken: /^Expo(nent)?PushToken\[/.test(p.pushToken ?? '') ? p.pushToken : prev?.pushToken ?? null,
     };
+    // One phone = one push token = one user. After a reinstall or re-onboarding the same phone
+    // joins with a new id; take the token off the old record so it isn't pushed twice
+    // (possibly with the other gender's wording).
+    if (u.pushToken) for (const o of users.values()) if (o.id !== u.id && o.pushToken === u.pushToken) o.pushToken = null;
     users.set(u.id, u);
     save();
     const room = roomOf(u);
