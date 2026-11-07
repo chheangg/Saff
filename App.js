@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useReducer, useRef } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
-import { Store, initialState, reducer, startAdhan } from './src/store';
+import { Store, initialState, isDemoActive, reducer, startAdhan } from './src/store';
+import { loadSaved, save } from './src/persist';
 import { connectLive, isLive, mirror, rejoin } from './src/live';
 import Onboarding from './src/screens/Onboarding';
 import Home from './src/screens/Home';
@@ -28,7 +29,19 @@ export default function App() {
   const meRef = useRef(state.me);
   meRef.current = state.me;
 
-  useEffect(() => connectLive(rawDispatch, () => meRef.current), []);
+  const [deviceId, setDeviceId] = useState(null);
+
+  // Restore profile + streak, then connect to the server with a stable id.
+  useEffect(() => {
+    loadSaved().then((saved) => {
+      rawDispatch({ type: 'HYDRATE', onboarded: saved.onboarded, me: saved.me });
+      setDeviceId(saved.deviceId);
+    });
+  }, []);
+  useEffect(() => (deviceId ? connectLive(rawDispatch, () => meRef.current, deviceId) : undefined), [deviceId]);
+  useEffect(() => {
+    if (deviceId && !isDemoActive()) save({ deviceId, onboarded: state.onboarded, me: state.me });
+  }, [deviceId, state.onboarded, state.me]);
   useEffect(() => { if (state.onboarded) rejoin(state.me); }, [state.onboarded, state.me.gender]);
 
   useEffect(() => {
@@ -41,6 +54,8 @@ export default function App() {
     });
     return () => sub.remove();
   }, []);
+
+  if (!deviceId) return null; // brief, while storage loads
 
   const { onboarded, adhan, response, chatOpen } = state;
   let Screen = Home;

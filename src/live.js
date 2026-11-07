@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 import { isDemoActive } from './store';
 
 const URL = process.env.EXPO_PUBLIC_SERVER_URL;
-const deviceId = `u-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+let deviceId = null; // set from on-device storage before connecting
 
 export const live = URL ? io(URL, { transports: ['websocket'], autoConnect: false }) : null;
 export const isLive = !!live;
@@ -12,8 +12,9 @@ export const isLive = !!live;
 // Server ids -> local 'me' so the UI can tell which bubbles/avatars are yours.
 const local = (id) => (id === deviceId ? 'me' : id);
 
-export function connectLive(dispatch, getMe) {
+export function connectLive(dispatch, getMe, id) {
   if (!live) return () => {};
+  deviceId = id;
   const join = () => live.emit('join', { ...getMe(), id: deviceId });
   const onAdhan = (prayer) => !isDemoActive() && dispatch({ type: 'ADHAN', prayer });
   const onGroup = (g) =>

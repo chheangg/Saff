@@ -22,6 +22,8 @@ const msg = (userId, text) => ({ id: String(++msgId), userId, text, at: Date.now
 
 export function reducer(s, a) {
   switch (a.type) {
+    case 'HYDRATE':
+      return { ...s, onboarded: a.onboarded, me: a.me ? { ...s.me, ...a.me, id: 'me' } : s.me };
     case 'ONBOARD':
       return { ...s, onboarded: true, me: { ...s.me, ...a.profile } };
     case 'ADHAN':

@@ -3,10 +3,12 @@
 import express from 'express';
 import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
+import { readFileSync, writeFileSync, renameSync } from 'node:fs';
 import { Server } from 'socket.io';
 import { Coordinates, CalculationMethod, PrayerTimes } from 'adhan';
 
 const PORT = process.env.PORT || 4000;
+const DB_FILE = process.env.DB_FILE || new URL('./data.json', import.meta.url).pathname;
 const ADMIN_KEY = process.env.ADMIN_KEY || 'saff';
 const TZ = 'America/Los_Angeles';
 const GROUP_MS = 30 * 60 * 1000;
@@ -20,7 +22,23 @@ const http = createServer(app);
 const io = new Server(http, { cors: { origin: '*' } });
 
 // ---------- state ----------
-const users = new Map(); // id -> user
+const users = new Map(); // id -> user (persisted to DB_FILE so streaks survive restarts)
+try {
+  for (const u of JSON.parse(readFileSync(DB_FILE, 'utf8')).users ?? []) users.set(u.id, u);
+  console.log(`[db] loaded ${users.size} users`);
+} catch {}
+let saveTimer = null;
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      writeFileSync(DB_FILE + '.tmp', JSON.stringify({ users: [...users.values()] }));
+      renameSync(DB_FILE + '.tmp', DB_FILE);
+    } catch (e) {
+      console.error('[db] save failed', e.message);
+    }
+  }, 500);
+}
 let adhan = null; // { key, label, timeLabel, at }
 let groups = { brother: emptyGroup(), sister: emptyGroup() };
 
@@ -101,6 +119,7 @@ io.on('connection', (socket) => {
       lastDay: prev?.lastDay ?? null,
     };
     users.set(u.id, u);
+    save();
     if (socket.data.gender && socket.data.gender !== gender) socket.leave(socket.data.gender);
     socket.data.id = u.id;
     socket.data.gender = gender;
@@ -139,6 +158,7 @@ io.on('connection', (socket) => {
       u.prayedToday = {};
     }
     u.prayedToday = { ...u.prayedToday, [adhan.key]: true };
+    save();
     socket.emit('me', pub(u));
     emitGroup(u.gender);
   });
