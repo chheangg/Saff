@@ -58,6 +58,8 @@ echo "EXPO_PUBLIC_SERVER_URL=http://<your-laptop-ip>:4000" > .env   # in the rep
 curl -X POST "http://localhost:4000/adhan?key=saff" -H 'content-type: application/json' -d '{"prayer":"asr"}'   # trigger an adhan now
 ```
 
+**Deploy the server on Replit:** Import this repo from GitHub, add a Secret `ADMIN_KEY`, and click Deploy → **Reserved VM** (not Autoscale, because state is in memory; `server/data.json` resets on each redeploy). `.replit` already has the build and run commands set. Then set `EXPO_PUBLIC_SERVER_URL=https://<your-app>.replit.app` in `.env.local`.
+
 The server is in-memory: Socket.IO events `join`, `free`, `message`, `prayed` → `adhan`, `group`, `me`. Brothers and sisters get separate groups, and streaks go up once per Pacific day. Set `ADMIN_KEY` in production. Demo mode still works while live mode is on.
 
 ## Tech stack: Expo app + 60-second video

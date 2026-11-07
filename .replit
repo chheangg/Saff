@@ -1,0 +1,14 @@
+# Replit runs only the realtime server (server/). The Expo app runs on phones via Expo Go.
+modules = ["nodejs-20"]
+run = "cd server && npm install && npm start"
+
+[deployment]
+# Reserved VM: the server keeps groups/streaks in memory and schedules the adhan with timers,
+# so it must stay on as a single always-running instance (Autoscale would sleep and lose state).
+deploymentTarget = "gce"
+build = ["sh", "-c", "cd server && npm ci"]
+run = ["sh", "-c", "cd server && npm start"]
+
+[[ports]]
+localPort = 4000
+externalPort = 80
