@@ -19,7 +19,7 @@ export function Avatar({ user, size = 40, ring = false }) {
         borderColor: C.white,
       }}
     >
-      <Text style={{ fontSize: size * 0.42, fontWeight: '600', color: C.white }}>{initials}</Text>
+      <Text style={{ fontSize: size * 0.42, fontWeight: '600', color: C.onColor }}>{initials}</Text>
     </View>
   );
 }
@@ -28,8 +28,8 @@ export function Avatar({ user, size = 40, ring = false }) {
 export function Button({ title, onPress, variant = 'primary', disabled, style, icon }) {
   const v = {
     primary: { bg: C.black, fg: C.white },
-    accent: { bg: C.accent, fg: C.white },
-    brand: { bg: C.brand, fg: C.white },
+    accent: { bg: C.accent, fg: C.onColor },
+    brand: { bg: C.brand, fg: C.onColor },
     ghost: { bg: 'transparent', fg: C.g700 },
     light: { bg: C.white, fg: C.black },
   }[variant];
@@ -62,7 +62,7 @@ export function PrayerDots({ done, current, showTimes = true }) {
         return (
           <View key={p} style={{ alignItems: 'center', gap: 6 }}>
             <View style={[s.node, isDone && s.nodeDone, isNow && s.nodeNow]}>
-              <Ionicons name={isDone ? 'checkmark' : isNow ? 'moon' : missed ? 'remove' : 'lock-closed'} size={isDone ? 24 : 20} color={isDone || isNow ? C.white : C.g300} />
+              <Ionicons name={isDone ? 'checkmark' : isNow ? 'moon' : missed ? 'remove' : 'lock-closed'} size={isDone ? 24 : 20} color={isDone || isNow ? C.onColor : C.g300} />
             </View>
             <Text style={{ fontSize: 13, fontWeight: '600', color: isDone || isNow ? C.black : C.g700 }}>{LABEL[p]}</Text>
             {showTimes && <Text style={{ fontSize: 11, color: C.g700 }}>{fmtTime(t[p]).replace(/ (AM|PM)/, '')}</Text>}
@@ -84,7 +84,7 @@ export function WeekRow({ streak, prayedToday }) {
           <View key={i} style={{ alignItems: 'center', gap: 6 }}>
             <Text style={[T.kicker, { color: i === today ? C.flame : C.g500 }]}>{d}</Text>
             <View style={[s.day, filled && { backgroundColor: C.flame }, i === today && !filled && { borderWidth: 2, borderColor: C.flame, backgroundColor: C.flameSoft }]}>
-              {filled && <Ionicons name="checkmark" size={15} color={C.white} />}
+              {filled && <Ionicons name="checkmark" size={15} color={C.onColor} />}
             </View>
           </View>
         );

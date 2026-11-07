@@ -5,10 +5,11 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "edu.ucsd.saff"
+      "bundleIdentifier": "edu.ucsd.saff",
+      "userInterfaceStyle": "automatic"
     },
     "android": {
       "adaptiveIcon": {

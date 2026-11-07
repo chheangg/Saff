@@ -6,6 +6,7 @@ import * as Notifications from 'expo-notifications';
 import { Store, initialState, isDemoActive, reducer, startAdhan } from './src/store';
 import { loadSaved, save } from './src/persist';
 import { useAppFonts } from './src/fonts';
+import { C } from './src/theme';
 import { connectLive, isLive, mirror, rejoin } from './src/live';
 import TabBar from './src/TabBar';
 import Onboarding from './src/screens/Onboarding';
@@ -68,11 +69,11 @@ export default function App() {
   if (!deviceId || !fontsLoaded) return null; // brief, while storage + fonts load
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={{ backgroundColor: C.canvas }}>
       <Store.Provider value={store}>
-        <StatusBar style="dark" />
+        <StatusBar style="auto" />
         {/* On laptops (web), keep a phone-width column centered. */}
-        <View style={{ flex: 1, width: '100%', maxWidth: native ? undefined : 480, alignSelf: 'center' }}>
+        <View style={{ flex: 1, width: '100%', maxWidth: native ? undefined : 480, alignSelf: 'center', backgroundColor: C.canvas }}>
         {!state.onboarded ? (
           <Onboarding />
         ) : (

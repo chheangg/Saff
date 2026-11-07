@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { C } from './theme';
+import { C, DARK } from './theme';
 import { useStore } from './store';
 
 export const TABS = [
@@ -21,7 +21,7 @@ export default function TabBar() {
 
   return (
     <View style={[s.wrap, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-      <BlurView intensity={40} tint="light" style={s.bar}>
+      <BlurView intensity={40} tint={DARK ? 'dark' : 'light'} style={s.bar}>
         {TABS.map((t) => {
           const active = state.tab === t.key;
           return (
@@ -34,7 +34,7 @@ export default function TabBar() {
                 dispatch({ type: 'TAB', tab: t.key });
               }}
             >
-              <Ionicons name={active ? t.icon : `${t.icon}-outline`} size={22} color={active ? C.white : C.g700} />
+              <Ionicons name={active ? t.icon : `${t.icon}-outline`} size={22} color={active ? C.onColor : C.g700} />
               {t.key === 'chat' && live && <View style={s.dot} />}
             </Pressable>
           );
@@ -52,9 +52,9 @@ const s = StyleSheet.create({
     padding: 6,
     borderRadius: 32,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.75)',
+    backgroundColor: DARK ? 'rgba(30,30,36,0.8)' : 'rgba(255,255,255,0.75)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.9)',
+    borderColor: DARK ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.9)',
     shadowColor: '#000',
     shadowOpacity: 0.12,
     shadowRadius: 20,
@@ -62,5 +62,5 @@ const s = StyleSheet.create({
   },
   item: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
   active: { backgroundColor: C.brand },
-  dot: { position: 'absolute', top: 12, right: 12, width: 9, height: 9, borderRadius: 5, backgroundColor: C.accent, borderWidth: 1.5, borderColor: C.white },
+  dot: { position: 'absolute', top: 12, right: 12, width: 9, height: 9, borderRadius: 5, backgroundColor: C.accent, borderWidth: 1.5, borderColor: C.canvas },
 });

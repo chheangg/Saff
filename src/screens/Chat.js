@@ -57,10 +57,6 @@ export default function Chat() {
               <Pressable key={u.id} onPress={() => dispatch({ type: 'PROFILE', user: u })} style={{ alignItems: 'center', gap: 3 }}>
                 <Avatar user={u} size={46} />
                 <Text style={{ fontSize: 12, fontWeight: '600' }}>{u.id === 'me' ? 'You' : u.name}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                  <Ionicons name="flame" size={11} color={C.flame} />
-                  <Text style={{ fontSize: 11, fontWeight: '600', color: C.flame }}>{u.streak}</Text>
-                </View>
               </Pressable>
             ))}
           </ScrollView>
@@ -96,7 +92,7 @@ export default function Chat() {
                 {!mine && u && <Avatar user={u} size={30} />}
                 <View style={[s.bubble, mine ? s.mine : s.theirs]}>
                   {!mine && <Text style={{ fontSize: 12, fontWeight: '600', color: avatarColor(m.userId) }}>{u?.name}</Text>}
-                  <Text style={{ fontSize: 15, color: mine ? C.white : C.black }}>{m.text}</Text>
+                  <Text style={{ fontSize: 15, color: mine ? C.onColor : C.black }}>{m.text}</Text>
                 </View>
               </View>
             );
@@ -132,7 +128,7 @@ export default function Chat() {
             <View style={s.inputRow}>
               <TextInput value={text} onChangeText={setText} placeholder="Message" placeholderTextColor={C.g500} style={s.input} onSubmitEditing={() => send()} returnKeyType="send" />
               <Pressable onPress={() => send()} style={s.send}>
-                <Ionicons name="arrow-up" size={20} color={C.white} />
+                <Ionicons name="arrow-up" size={20} color={C.onColor} />
               </Pressable>
             </View>
             <Button title="We prayed" icon="checkmark-circle" variant="accent" onPress={() => dispatch({ type: 'PRAYED' })} />

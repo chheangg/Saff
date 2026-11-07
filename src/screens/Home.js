@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Notifications from 'expo-notifications';
 import { C, CARD, FLAME, HERO, T } from '../theme';
-import { Button, PrayerDots, Sheet, WeekRow } from '../ui';
+import { Button, PrayerDots, Sheet } from '../ui';
 import { playDemo, scheduleToday, stopDemo, useStore } from '../store';
 import { currentPrayer, fmtIn, fmtTime, nextPrayer } from '../prayer';
 import { campusOf } from '../data';
@@ -58,7 +58,7 @@ export default function Home() {
           <View style={s.heroGlow} />
           <View style={{ flex: 1, gap: 4 }}>
             <Text style={[T.kicker, { color: '#C7D2FE' }]}>Next up</Text>
-            <Text style={{ fontSize: 40, fontWeight: '700', letterSpacing: -1.5, color: C.white }}>{next.label}</Text>
+            <Text style={{ fontSize: 40, fontWeight: '700', letterSpacing: -1.5, color: C.onColor }}>{next.label}</Text>
             <Text style={{ fontSize: 16, color: '#C7D2FE' }}>
               {fmtTime(next.time)} · in {fmtIn(next.time - now)}
             </Text>
@@ -68,13 +68,13 @@ export default function Home() {
 
         <View style={{ gap: 14 }}>
           <Text style={T.h2}>Today</Text>
-          <PrayerDots done={me.prayedToday ?? {}} current={currentPrayer(now).key} />
+          <PrayerDots done={me.prayedToday ?? {}} current={currentPrayer(now).key} showTimes={false} />
         </View>
 
         <View style={s.card}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <LinearGradient colors={FLAME} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.flameBadge}>
-              <Ionicons name="flame" size={28} color={C.white} />
+              <Ionicons name="flame" size={24} color={C.onColor} />
             </LinearGradient>
             <View style={{ flex: 1, gap: 2 }}>
               <Text style={[T.h2, { color: C.flame }]}>{me.streak} day streak</Text>
@@ -83,22 +83,11 @@ export default function Home() {
               </Text>
             </View>
           </View>
-          <WeekRow streak={me.streak} prayedToday={prayedToday} />
         </View>
 
-        <View style={[s.card, { flexDirection: 'row', alignItems: 'center' }]}>
-          <View style={[s.flameBadge, { backgroundColor: C.accentSoft }]}>
-            <Ionicons name="people" size={24} color={C.accent} />
-          </View>
-          <View style={{ flex: 1, gap: 2 }}>
-            <Text style={{ fontSize: 17, fontWeight: '600', color: C.black }}>
-              {network.prayers ? `${network.prayers} prayed today` : 'Be the first today'}
-            </Text>
-            <Text style={{ fontSize: 13, color: C.g700 }}>
-              {network.campuses} campus{network.campuses === 1 ? '' : 'es'} · Manara
-            </Text>
-          </View>
-        </View>
+        <Text style={[T.meta, { textAlign: 'center' }]}>
+          {network.prayers ? `${network.prayers} prayed today` : 'Be the first today'} · {network.campuses} campus{network.campuses === 1 ? '' : 'es'} · Manara
+        </Text>
 
         {Platform.OS !== 'web' && (
           <View style={[s.card, { flexDirection: 'row', alignItems: 'center' }]}>
