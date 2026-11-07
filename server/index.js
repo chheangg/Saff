@@ -5,6 +5,7 @@ import express from 'express';
 import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { readFileSync, writeFileSync, renameSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { Server } from 'socket.io';
 import { Coordinates, CalculationMethod, PrayerTimes } from 'adhan';
 
@@ -230,9 +231,35 @@ app.get('/', (_req, res) =>
   }),
 );
 
+// Admin key comes from the x-admin-key header (admin page) or ?key= (curl).
+const isAdmin = (req) => (req.get('x-admin-key') ?? req.query.key) === ADMIN_KEY;
+
+// Phone-friendly admin page: fire an adhan and watch groups fill. The page holds no secrets;
+// the key is typed on the phone and sent with each request.
+app.get('/admin', (_req, res) => res.sendFile(fileURLToPath(new URL('./admin.html', import.meta.url))));
+
+// Live view for the admin page: who is in each group right now.
+app.get('/admin/status', (req, res) => {
+  if (!isAdmin(req)) return res.status(401).json({ error: 'bad key' });
+  const rooms = [...groups.entries()].map(([room, g]) => ({
+    room,
+    members: g.members.map((id) => users.get(id)?.name ?? '?'),
+    messages: g.messages.length,
+    spot: g.spot,
+  }));
+  res.json({
+    adhan,
+    live: !!adhanLive(),
+    clients: io.engine.clientsCount,
+    users: users.size,
+    rooms,
+    today: prayerTimes().map((p) => ({ key: p.key, label: p.label, time: timeLabel(p.time) })),
+  });
+});
+
 // Manual trigger for testing/demo: POST /adhan?key=saff  {"prayer":"asr"}
 app.post('/adhan', (req, res) => {
-  if (req.query.key !== ADMIN_KEY) return res.status(401).json({ error: 'bad key' });
+  if (!isAdmin(req)) return res.status(401).json({ error: 'bad key' });
   const all = prayerTimes();
   const p = all.find((x) => x.key === req.body?.prayer) ?? all.filter((x) => x.time <= new Date()).at(-1) ?? all[4];
   fireAdhan({ ...p, timeLabel: timeLabel(p.time) });

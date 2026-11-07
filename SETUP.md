@@ -62,7 +62,7 @@ The server is live on Replit at **https://saff-alimran13.replit.app**. It's alwa
 - Expo: expo.dev, project **Environment variables**, **production** environment (that's what `publish:app` uses)
 - Vercel: project **Settings → Environment Variables**, **Production**
 
-**Fire an adhan now (for testing or the demo):**
+**Fire an adhan now (for testing or the demo):** open **https://saff-alimran13.replit.app/admin** on your phone, enter `ADMIN_KEY` once, and tap a prayer. The page also shows who has joined each group in real time. Or use curl:
 
 ```bash
 curl -X POST "https://saff-alimran13.replit.app/adhan?key=<ADMIN_KEY>" -H 'content-type: application/json' -d '{"prayer":"asr"}'
