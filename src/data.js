@@ -88,3 +88,45 @@ export const CHAT_SCRIPT = [
 ];
 
 export const REPLY = [3, 'Perfect, see you there insha\'Allah'];
+
+// ---------- Past jama'ahs (demo history for the Chat tab) ----------
+const MORE = {
+  brother: [
+    { id: 'b5', name: 'Zaid', major: 'Biology', year: '2nd year', streak: 19, ...link },
+    { id: 'b6', name: 'Ibrahim', major: 'Cognitive Science', year: '4th year', streak: 33, ...link },
+    { id: 'b7', name: 'Musa', major: 'Electrical Eng.', year: '1st year', streak: 5, ...link },
+  ],
+  sister: [
+    { id: 's5', name: 'Fatima', major: 'Biochemistry', year: '3rd year', streak: 22, ...link },
+    { id: 's6', name: 'Hana', major: 'Economics', year: '2nd year', streak: 11, ...link },
+    { id: 's7', name: 'Layla', major: 'Data Science', year: '4th year', streak: 6, ...link },
+  ],
+};
+
+const day = (n) => {
+  if (n === 0) return 'Today';
+  if (n === 1) return 'Yesterday';
+  return new Date(Date.now() - n * 864e5).toLocaleDateString('en-US', { weekday: 'long' });
+};
+
+// Each past chat: who prayed, where, and the conversation (read-only).
+export function demoHistory(gender) {
+  const [a, b, c, d] = BOTS[gender];
+  const [e, f, g] = MORE[gender];
+  const H = (id, n, prayer, time, spot, members, lines) => ({
+    id,
+    prayer,
+    when: `${day(n)} · ${time}`,
+    spot,
+    members,
+    messages: lines.map(([u, text], i) => ({ id: `${id}-${i}`, userId: u.id, text })),
+  });
+  return [
+    H('h1', 0, 'Dhuhr', '11:34 AM', 'Price Center', [a, b, e], [[a, 'Salam! Price Center in 5?'], [e, 'On my way from Geisel'], [b, 'Saving a spot by the window'], [a, 'JazakAllah khair everyone']]),
+    H('h2', 0, 'Fajr', '5:02 AM', 'Library Walk lawn', [c, f], [[c, 'Anyone up for Fajr?'], [f, 'Yes! Library Walk?'], [c, 'Bring a jacket, it is cold']]),
+    H('h3', 1, 'Isha', '6:04 PM', 'Geisel, 2nd floor', [a, d, g, e], [[d, 'Isha at Geisel 2nd floor, quiet room'], [g, 'Coming after lab'], [e, 'Who wants food after?'], [a, 'Halal truck on Library Walk 🔥']]),
+    H('h4', 1, 'Asr', '2:32 PM', 'Price Center', [b, c, f], [[b, 'Asr after the midterm?'], [f, 'Price Center, 10 min'], [c, 'Good luck everyone, insha\'Allah']]),
+    H('h5', 2, 'Maghrib', '4:55 PM', 'Old Student Center', [a, b, c, d, g], [[a, 'Maghrib at Old Student Center'], [g, 'Big group today, alhamdulillah'], [d, 'Who is leading?'], [b, 'Omar has the nicest recitation 😄']]),
+    H('h6', 3, 'Dhuhr', '11:35 AM', 'RIMAC field', [e, f], [[e, 'Dhuhr at RIMAC after pickup?'], [f, 'Down, 12 min walk']]),
+  ];
+}

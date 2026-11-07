@@ -136,6 +136,7 @@ claude mcp add pencil -- /Applications/Pen.app/Contents/Resources/app.asar.unpac
 - [x] **Edit profile + sign out** (Profile tab): change name, campus, brother/sister, and links. Changes rejoin the server right away. Sign out wipes the device and returns to onboarding.
 - [x] **First one in isn't stuck:** in a live group, Matching lets you open the chat alone after 4s ("You're first").
 - [x] **Real walk times:** the chat asks for location once and computes minutes to each spot (straight-line × 1.2 at 80 m/min). Spots sort last-used first, then nearest. Location never leaves the phone. When you're more than 3 km from campus, it keeps the default estimates.
+- [x] **Past chats** (Chat tab when no live group): a scrollable list of previous jama'ahs. Open one to read it, and tap anyone to see their profile, LinkedIn, and Instagram. Real chats are saved on "We prayed" (`state.history`, persisted). The demo seeds a week of history (`demoHistory` in `src/data.js`).
 - [ ] Two-phone live test at a real prayer time. The server fires on its own, no admin key needed.
 
 **Tokens** (`src/theme.js` mirrors the .pen variables):

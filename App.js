@@ -47,14 +47,14 @@ export default function App() {
   // Restore profile + streak, then connect to the server with a stable id.
   useEffect(() => {
     loadSaved().then((saved) => {
-      rawDispatch({ type: 'HYDRATE', onboarded: saved.onboarded, me: saved.me });
+      rawDispatch({ type: 'HYDRATE', onboarded: saved.onboarded, me: saved.me, history: saved.history });
       setDeviceId(saved.deviceId);
     });
   }, []);
   useEffect(() => (deviceId ? connectLive(rawDispatch, () => (onboardedRef.current ? meRef.current : null), deviceId) : undefined), [deviceId]);
   useEffect(() => {
-    if (deviceId && !isDemoActive()) save({ deviceId, onboarded: state.onboarded, me: state.me });
-  }, [deviceId, state.onboarded, state.me]);
+    if (deviceId && !isDemoActive()) save({ deviceId, onboarded: state.onboarded, me: state.me, history: state.history });
+  }, [deviceId, state.onboarded, state.me, state.history]);
   useEffect(() => { if (state.onboarded) rejoin(state.me); }, [state.onboarded, state.me.gender, state.me.campus, state.me.name]);
   // Adhan alerts on by default: schedule today's prayers + register for server push, then tell the server.
   useEffect(() => {

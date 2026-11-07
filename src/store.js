@@ -21,6 +21,7 @@ export const initialState = {
   streakSheet: null, // { from, to }
   profile: null, // user shown in profile sheet
   network: { ...DEMO_NETWORK }, // { prayers, campuses } across the Manara network today
+  history: [], // your past jama'ahs (newest first); the demo adds seeded ones on top in ChatTab
 };
 
 let msgId = 0;
@@ -29,7 +30,7 @@ const msg = (userId, text) => ({ id: String(++msgId), userId, text, at: Date.now
 export function reducer(s, a) {
   switch (a.type) {
     case 'HYDRATE':
-      return { ...s, onboarded: a.onboarded, me: a.me ? { ...s.me, ...a.me, id: 'me' } : s.me };
+      return { ...s, onboarded: a.onboarded, me: a.me ? { ...s.me, ...a.me, id: 'me' } : s.me, history: a.history ?? s.history };
     case 'ONBOARD':
       return { ...s, onboarded: true, me: { ...s.me, ...a.profile } };
     case 'ADHAN':
@@ -54,7 +55,16 @@ export function reducer(s, a) {
       const from = s.me.streak;
       const me = { ...s.me, streak: from + 1, prayedToday: { ...s.me.prayedToday, [s.adhan.key]: true }, lastJamaah: new Date().toDateString() };
       const network = { ...s.network, prayers: s.network.prayers + 1 }; // live mode: server overwrites
-      return { ...s, me, network, response: 'prayed', chatOpen: false, tab: 'home', streakSheet: { from, to: me.streak } };
+      // Keep this chat so you can find these people again later.
+      const past = {
+        id: `p-${Date.now()}`,
+        prayer: s.adhan.label,
+        when: `Today · ${s.adhan.timeLabel}`,
+        spotId: s.group.spot,
+        members: s.group.members.filter((u) => u.id !== 'me'),
+        messages: s.group.messages,
+      };
+      return { ...s, me, network, history: [past, ...s.history].slice(0, 50), response: 'prayed', chatOpen: false, tab: 'home', streakSheet: { from, to: me.streak } };
     }
     case 'CLOSE_STREAK':
       return { ...s, streakSheet: null };
@@ -74,7 +84,7 @@ export function reducer(s, a) {
     case 'PROFILE':
       return { ...s, profile: a.user };
     case 'RESET':
-      return { ...initialState, onboarded: s.onboarded, me: { ...s.me, streak: ME.streak, prayedToday: { ...ME.prayedToday }, lastJamaah: undefined } };
+      return { ...initialState, history: s.history, onboarded: s.onboarded, me: { ...s.me, streak: ME.streak, prayedToday: { ...ME.prayedToday }, lastJamaah: undefined } };
     default:
       return s;
   }
