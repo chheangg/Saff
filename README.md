@@ -14,7 +14,7 @@ Saff turns every adhan into a chance to meet. When prayer time hits, UCSD Muslim
 Borrowed from Uber's [Base design system](https://base.uber.com). It's the quietest of the three options. Duolingo is too playful, and Airbnb is photo-heavy. Uber's request flow (one big button, a live "matching" state, then a match) maps 1:1 onto ours.
 
 - **Color:** black, white, and grays only. One accent: green `#06C167`, used only for "I'm free" and live states.
-- **Type:** Inter (stand-in for Uber Move). 32 bold for the headline, 16 for body, 13 for meta.
+- **Type:** system font (SF Pro / Roboto, close to Uber Move). 32 bold for the headline, 16 for body, 13 for meta.
 - **Spacing:** 8px grid, 16px gutters, 12px card radius, pill buttons.
 - **Layout:** mobile-first, one primary action per screen, bottom sheets instead of new pages.
 - **Motion:** only one animation, the pulsing "finding brothers/sisters nearby" ring.
@@ -38,48 +38,64 @@ A streak counts consecutive days on which you prayed at least one prayer in cong
 - **Group touch:** the chat header shows each person's streak beside their avatar.
 - **Kept minimal:** no leagues, gems, or freezes. The flame uses the same green accent.
 
-## Tech stack: one Replit, one repo, zero accounts
+## Run it
+
+```bash
+npm install
+npx expo start          # scan the QR code with Expo Go (iOS camera / Android Expo Go app)
+npx expo start --tunnel # if your phone is on a different network
+```
+
+**Demo mode:** long-press the **Saff** wordmark on Home and tap **Play demo**. After 3 seconds, a real notification fires (lock the phone to catch the banner), the adhan screen opens, 4 seeded users join, and the chat plays a script. **Reset** replays it. Seed content lives in `src/data.js`.
+
+## Tech stack: Expo app + 60-second video
 
 | Layer | Pick | Why |
 | --- | --- | --- |
-| Frontend | Vite + React + Tailwind | Instant HMR; Base rules = small Tailwind config |
-| Realtime | Express + Socket.IO, in-memory | Live chat in about 40 lines, no DB/auth/keys |
-| Prayer times | `adhan` npm package, UCSD 32.8801, -117.2340 | Real times, computed offline |
-| "Push" | In-app takeover + adhan audio + browser `Notification` | Looks better on a projector than real push |
-| Login | Pick a name + gender (ucsd.edu field is cosmetic) | Skips auth |
-| Hosting | Replit deploy (fallback: laptop + ngrok) | Judges scan a QR code and join |
+| App | Expo SDK 58 (React Native), plain JS, runs in Expo Go | One codebase, scan and run |
+| Notifications | `expo-notifications` local notifications | Real banner at adhan time; works in Expo Go |
+| Prayer times | `adhan` npm, UCSD 32.8801, -117.2340 | Real times, offline |
+| Feel | `expo-haptics` + Animated | Pulse ring, pop-ins, streak pop |
+| Backend | Express + Socket.IO (or Supabase Realtime) | Real cross-phone groups; the video doesn't depend on it |
+| Deploy | `expo start --tunnel`, EAS Update for a share link | No App Store |
 
-**Demo mode is the backbone.** Every screen renders from one server-broadcast `state` object.
+**Real today:** "Ping me at every adhan" schedules real notifications for the rest of today's prayers. Tapping one opens the flow.
 
-- `/?demo=1` plays a scripted timeline: fake adhan now → 4 seeded bots tap "I'm free" → timed chat messages. **Reset** replays it. Deterministic, works offline.
-- **Live mode:** the presenter's "Trigger adhan" button pings every connected phone. Judges join from the QR code and show up in the real chat.
-
-Out of scope (pitch them as next steps): real auth, a DB, native push, location tracking, moderation.
+```
+App.js                 screen router + notification handler
+src/store.js           state (reducer) + demo engine + scheduling
+src/data.js            demo profile, bots, spots, chat script
+src/prayer.js          prayer times for UCSD
+src/ui.js              Avatar, Button, Sheet, PrayerDots, PopIn
+src/screens/           Onboarding, Home, Takeover, Matching, Chat, Sheets
+```
 
 ## Task split
 
-The only shared contract is the `state` shape and the socket events. Agree on both in the first 15 minutes.
+The demo runs fully on the phone, so the frontend never waits on the backend. The backend plugs in behind the same actions: `join`, `free`, `message`, `prayed`.
 
 | Person | Owns | Deliverables |
 | --- | --- | --- |
-| **Evan** | Frontend + design | Tailwind tokens. All 6 screens wired to `state`. Streak flame + prayer dots on Home, "We prayed" +1 sheet |
-| **Ibrahim** | Server + realtime + demo | Express + Socket.IO. Events `join`, `adhan`, `free`, `message`, `reset`. Brother/sister groups, 30-min expiry, "Trigger adhan" route. `?demo=1` scripted timeline + Reset (bots join, timed messages) using Ali's seed data. Streak counter ("We prayed" bumps it; the demo user starts at 6) |
-| **Ali** | Replit + content + pitch | Replit setup + deploy + QR code. `adhan` times. Seed data: 8 profiles, 5 UCSD spots. Adhan audio. Slides, script, judge-feedback log (consult ≥ 2 judges) |
+| **Evan** | Frontend + backend | Onboarding, Home, Profile sheet. Defines the event contract with Ali and wires the app to the backend |
+| **Ibrahim** | Frontend + demo | Takeover, Matching, Chat, Streak sheet. Demo pacing (`src/data.js`, `src/store.js`). Records + edits the 60s video |
+| **Ali** | Backend + deploy | Socket.IO/Supabase server for real groups + streaks. Tunnel / EAS Update link, app icon + splash |
+
+Everyone collects judge feedback (consult ≥ 2 judges).
 
 **Timeline**
 
-1. **2:45–3:00, all:** agree on the contract. Ali creates the Replit and imports this repo.
-2. **3:00–4:30:** solo builds (Evan: screens on mock state · Ibrahim: sockets + demo script · Ali: Replit + seed data).
-3. **4:30:** wire the frontend to sockets. Ali gets judge #1's feedback.
-4. **4:30–6:00:** full live loop on 3 phones. Ali gets judge #2's feedback. Evan polishes the animations.
-5. **6:00–6:30:** freeze, deploy, rehearse 3 times, record a backup video.
-6. **6:30–7:00:** buffer + slides.
+1. **2:45–3:00, all:** clone, `npm install`, `npx expo start` on your phones. Evan + Ali agree on the events.
+2. **3:00–4:30:** Evan + Ibrahim polish screens. Ali stands up the server.
+3. **4:30:** get judge #1's feedback. Evan wires the backend behind a flag; demo mode stays the default.
+4. **4:30–6:00:** get judge #2's feedback. Ibrahim tunes pacing to 60s. Ali ships the share link.
+5. **6:00–6:30:** freeze, record 3 takes.
+6. **6:30–7:00:** edit + submit.
 
-## Demo script (2 min)
+## Demo video (60s)
 
-1. **Hook (15s):** "At UCSD you see people partying or studying. You rarely see someone stepping out to pray."
-2. **Replay (45s):** `?demo=1` on the projector: adhan → takeover → I'm free → pulse fills → chat → spot suggested → profile → LinkedIn → **We prayed**, streak 6 → 7.
-3. **Live (40s):** QR code on screen, judges join, "Trigger adhan", every phone lights up, judges appear in the group.
-4. **Close (20s):** Deen & Dunya fit. Next: ucsd.edu verification, native push, a Manara network across campuses.
-
-**Backups:** demo mode on localhost if the Wi-Fi dies, and a recorded video if everything dies.
+1. **0–5s:** hook caption over Home.
+2. **5–15s:** Play demo, lock the phone, the "Asr · 3:42 PM" banner appears, tap it.
+3. **15–25s:** adhan screen, I'm free, the pulse fills with 4 brothers, the chat opens.
+4. **25–42s:** messages roll in, tap the Price Center chip, get a reply, open Omar's profile, then LinkedIn.
+5. **42–52s:** We prayed, flame pops, streak 6 → 7.
+6. **52–60s:** end card: Saff, Deen & Dunya, next steps.
