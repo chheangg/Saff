@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
 import { C, T } from '../theme';
-import { Avatar, Button, PrayerDots } from '../ui';
+import { Avatar, Button, PrayerDots, Sheet } from '../ui';
 import { playDemo, scheduleToday, stopDemo, useStore } from '../store';
 import { fmtIn, fmtTime, nextPrayer, times } from '../prayer';
 
@@ -28,14 +28,9 @@ export default function Home() {
     else setNotify(false);
   }
 
-  // Hidden presenter menu: long-press the wordmark.
-  function demoMenu() {
-    Alert.alert('Demo', 'Recording tip: lock the phone or go home after tapping Play to catch the notification.', [
-      { text: 'Play demo', onPress: () => playDemo(dispatch, me) },
-      { text: 'Reset', onPress: () => { stopDemo(); dispatch({ type: 'RESET' }); } },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  }
+  // Hidden presenter menu: long-press the wordmark (a sheet, so it also works on web).
+  const [menu, setMenu] = useState(false);
+  const demoMenu = () => setMenu(true);
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: C.white }}>
@@ -90,13 +85,13 @@ export default function Home() {
           </View>
         </View>
 
-        <View style={s.row}>
+        {Platform.OS !== 'web' && <View style={s.row}>
           <View style={{ flex: 1 }}>
             <Text style={[T.body, { fontWeight: '600' }]}>Ping me at every adhan</Text>
             <Text style={T.meta}>Only {me.gender}s within 10 min walk</Text>
           </View>
           <Switch value={notify} onValueChange={toggleNotify} trackColor={{ true: C.accent }} />
-        </View>
+        </View>}
 
         {adhan && response === 'no' && (
           <View style={[s.card, { gap: 12 }]}>
@@ -108,6 +103,15 @@ export default function Home() {
           <Text style={[T.body, { color: C.g700 }]}>You prayed {adhan.label} in jama'ah today.</Text>
         )}
       </ScrollView>
+
+      <Sheet visible={menu} onClose={() => setMenu(false)}>
+        <Text style={T.h2}>Demo</Text>
+        <Text style={T.meta}>
+          {Platform.OS === 'web' ? 'The adhan screen opens in 3 seconds.' : 'Tip: lock the phone after tapping Play to catch the notification.'}
+        </Text>
+        <Button title="Play demo" variant="accent" onPress={() => { setMenu(false); playDemo(dispatch, me); }} />
+        <Button title="Reset" variant="light" onPress={() => { setMenu(false); stopDemo(); dispatch({ type: 'RESET' }); }} />
+      </Sheet>
     </SafeAreaView>
   );
 }

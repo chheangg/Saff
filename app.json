@@ -20,10 +20,27 @@
       "package": "edu.ucsd.saff"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single",
+      "name": "Saff",
+      "shortName": "Saff",
+      "themeColor": "#000000",
+      "backgroundColor": "#FFFFFF",
+      "display": "standalone"
     },
     "plugins": [
       "expo-notifications"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "901fcf34-3eb9-443c-ab8d-ec3a99cf9451"
+      }
+    },
+    "owner": "evanlyy168",
+    "runtimeVersion": "exposdk:58.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/901fcf34-3eb9-443c-ab8d-ec3a99cf9451"
+    }
   }
 }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { Platform, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
 import { Store, initialState, isDemoActive, reducer, startAdhan } from './src/store';
@@ -15,7 +15,9 @@ import Profile from './src/screens/Profile';
 import Takeover from './src/screens/Takeover';
 import { ProfileSheet, StreakSheet } from './src/screens/Sheets';
 
-Notifications.setNotificationHandler({
+const native = Platform.OS !== 'web'; // browsers: no local notifications, in-app adhan only
+
+if (native) Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
     shouldShowList: true,
@@ -50,6 +52,7 @@ export default function App() {
   useEffect(() => { if (state.onboarded) rejoin(state.me); }, [state.onboarded, state.me.gender]);
 
   useEffect(() => {
+    if (!native) return;
     Notifications.requestPermissionsAsync().catch(() => {});
     // Tapping a real (scheduled) prayer notification opens the adhan flow.
     const sub = Notifications.addNotificationResponseReceivedListener((res) => {
@@ -66,6 +69,8 @@ export default function App() {
     <SafeAreaProvider>
       <Store.Provider value={store}>
         <StatusBar style="dark" />
+        {/* On laptops (web), keep a phone-width column centered. */}
+        <View style={{ flex: 1, width: '100%', maxWidth: native ? undefined : 480, alignSelf: 'center' }}>
         {!state.onboarded ? (
           <Onboarding />
         ) : (
@@ -82,6 +87,7 @@ export default function App() {
         )}
         <StreakSheet />
         <ProfileSheet />
+        </View>
       </Store.Provider>
     </SafeAreaProvider>
   );

@@ -1,5 +1,8 @@
 import { createContext, useContext } from 'react';
 import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
+
+const native = Platform.OS !== 'web';
 import { ME, BOTS, JOIN_TIMES, CHAT_SCRIPT, REPLY, DEMO_SPOT_STATS, DEMO_NETWORK } from './data';
 import { currentPrayer, fmtTime, times } from './prayer';
 
@@ -90,7 +93,7 @@ export function stopDemo() {
   timers.forEach(clearTimeout);
   timers = [];
   demoActive = false;
-  Notifications.cancelAllScheduledNotificationsAsync().catch(() => {});
+  if (native) Notifications.cancelAllScheduledNotificationsAsync().catch(() => {});
 }
 
 function adhanContent(prayer, gender) {
@@ -108,7 +111,7 @@ export function playDemo(dispatch, me, delay = 3000) {
   demoActive = true;
   const p = currentPrayer();
   const prayer = { key: p.key, label: p.label, timeLabel: fmtTime(p.time) };
-  Notifications.scheduleNotificationAsync({
+  if (native) Notifications.scheduleNotificationAsync({
     content: adhanContent(prayer, me.gender),
     trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: Math.max(1, delay / 1000) },
   }).catch(() => {});

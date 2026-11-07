@@ -40,7 +40,7 @@ A streak counts consecutive days on which you prayed at least one prayer in cong
 
 ## Run it
 
-Teammates: see [SETUP.md](SETUP.md) to get it on your phone + who owns which files.
+**On your iPhone:** Expo Go link or https://saff-sand.vercel.app. See [SETUP.md](SETUP.md) (also: who owns which files).
 
 ```bash
 npm install
