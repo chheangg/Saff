@@ -8,6 +8,7 @@ const emptyGroup = () => ({ members: [], messages: [], expiresAt: null });
 
 export const initialState = {
   onboarded: false,
+  tab: 'home', // 'home' | 'chat' | 'food' | 'profile'
   me: { ...ME },
   adhan: null, // { key, label, timeLabel, at }
   response: null, // 'free' | 'no' | 'prayed'
@@ -35,7 +36,9 @@ export function reducer(s, a) {
     }
     case 'RESPOND':
       if (a.answer !== 'free') return { ...s, response: a.answer };
-      return reducer({ ...s, response: 'free' }, { type: 'JOIN', user: s.me });
+      return reducer({ ...s, response: 'free', tab: 'chat' }, { type: 'JOIN', user: s.me });
+    case 'TAB':
+      return { ...s, tab: a.tab };
     case 'OPEN_CHAT':
       return { ...s, chatOpen: true };
     case 'MESSAGE':
@@ -43,7 +46,7 @@ export function reducer(s, a) {
     case 'PRAYED': {
       const from = s.me.streak;
       const me = { ...s.me, streak: from + 1, prayedToday: { ...s.me.prayedToday, [s.adhan.key]: true } };
-      return { ...s, me, response: 'prayed', chatOpen: false, streakSheet: { from, to: me.streak } };
+      return { ...s, me, response: 'prayed', chatOpen: false, tab: 'home', streakSheet: { from, to: me.streak } };
     }
     case 'CLOSE_STREAK':
       return { ...s, streakSheet: null };

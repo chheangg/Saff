@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
 import { C, T } from '../theme';
 import { Avatar, Button, PrayerDots } from '../ui';
 import { playDemo, scheduleToday, stopDemo, useStore } from '../store';
-import { fmtIn, fmtTime, nextPrayer } from '../prayer';
+import { fmtIn, fmtTime, nextPrayer, times } from '../prayer';
 
 export default function Home() {
   const { state, dispatch } = useStore();
@@ -38,8 +38,8 @@ export default function Home() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: C.white }}>
-      <View style={{ flex: 1, padding: 16, gap: 24 }}>
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: C.white }}>
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 24 }}>
         <View style={s.header}>
           <Pressable onLongPress={demoMenu} delayLongPress={600}>
             <Text style={{ fontSize: 26, fontWeight: '800', letterSpacing: -0.5 }}>Saff</Text>
@@ -68,6 +68,19 @@ export default function Home() {
           <PrayerDots done={me.prayedToday} />
         </View>
 
+        <View style={s.card}>
+          <Text style={T.h2}>Today's prayers</Text>
+          {times(now).map((p) => {
+            const isNext = p.key === next.key && p.time > now;
+            return (
+              <View key={p.key} style={s.timeRow}>
+                <Text style={[T.body, { flex: 1, fontWeight: isNext ? '700' : '400', color: p.time <= now ? C.g500 : C.black }]}>{p.label}</Text>
+                <Text style={[T.body, { fontWeight: isNext ? '700' : '400', color: p.time <= now ? C.g500 : C.black }]}>{fmtTime(p.time)}</Text>
+              </View>
+            );
+          })}
+        </View>
+
         <View style={s.row}>
           <View style={{ flex: 1 }}>
             <Text style={[T.body, { fontWeight: '600' }]}>Ping me at every adhan</Text>
@@ -85,7 +98,7 @@ export default function Home() {
         {adhan && response === 'prayed' && (
           <Text style={[T.body, { color: C.g700 }]}>You prayed {adhan.label} in jama'ah today.</Text>
         )}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -94,4 +107,5 @@ const s = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   card: { backgroundColor: C.g50, borderRadius: 12, padding: 16, gap: 16 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  timeRow: { flexDirection: 'row', alignItems: 'center' },
 });

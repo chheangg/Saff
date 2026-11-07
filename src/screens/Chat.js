@@ -36,7 +36,7 @@ export default function Chat() {
   const data = [{ id: 'sys', system: true }, ...group.messages];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: C.white }} edges={['top', 'bottom']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.white }} edges={['top']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={s.header}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
@@ -84,6 +84,10 @@ export default function Chat() {
 
         <View style={{ gap: 10, paddingBottom: 8 }}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}>
+            <Pressable onPress={() => dispatch({ type: 'TAB', tab: 'food' })} style={[s.chip, { backgroundColor: C.black }]}>
+              <Text style={{ fontSize: 14, fontWeight: '600', color: C.white }}>🍽 Halal food nearby</Text>
+              <Text style={[T.meta, { fontSize: 12, color: C.g300 }]}>after prayer</Text>
+            </Pressable>
             {SPOTS.map((p) => (
               <Pressable key={p.id} onPress={() => send(`Meet at ${p.name}? (${p.walk} min walk)`)} style={s.chip}>
                 <Text style={{ fontSize: 14, fontWeight: '600' }}>📍 {p.name}</Text>

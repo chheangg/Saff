@@ -47,7 +47,7 @@ export default function Matching() {
   }, [others.length]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: C.white }}>
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: C.white }}>
       <View style={{ flex: 1, padding: 24, justifyContent: 'space-between' }}>
         <View style={{ gap: 6, marginTop: 24 }}>
           <Text style={T.h1}>{others.length ? `${others.length} ${me.gender}s are free` : `Finding ${me.gender}s nearby…`}</Text>
