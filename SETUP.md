@@ -1,66 +1,85 @@
-# Get Saff on your phone
+# Saff on your iPhone
 
-## Fastest: use Evan's running server (nothing to install but Expo Go)
+No laptop, tunnel, or Wi-Fi tricks needed. Both links below are hosted and always on.
 
-1. Install **Expo Go** from the App Store / Play Store.
-2. Open this in Expo Go (on iPhone, paste it into Safari or scan the QR code Evan shares):
-   `exp://c-evanlyy168-6s543z-mw5nzzwjvvg2osag.on.expo.app`
-   <img src="assets/expo-go-qr.png" width="200" alt="QR code to open Saff in Expo Go">
-3. Wait 30–60s on first load. Works on campus Wi-Fi and cellular.
+## Option 1: Native app in Expo Go (recommended, used for the video)
 
-This shows **Evan's laptop's code**, so your edits won't appear. To work on the code, use the next section.
+1. Install **Expo Go** from the App Store.
+2. Open the link with your iPhone camera. Scan the QR code, or tap the link from Messages/Notes:
 
-## Run it from your own laptop (to edit code)
+   `exp://u.expo.dev/901fcf34-3eb9-443c-ab8d-ec3a99cf9451?channel-name=main&runtime-version=exposdk:58.0.0`
+
+   <img src="assets/qr-expo-go.png" width="200" alt="QR code: Saff in Expo Go">
+
+3. Allow notifications when asked. The demo's adhan banner needs them.
+
+Expo Go loads the **latest published version**. To pick up new changes, close the app fully and reopen it. If it still shows the old version, reopen it once more.
+
+## Option 2: Web app (zero install)
+
+Open **https://saff-sand.vercel.app** in Safari, then tap **Share → Add to Home Screen** for an app icon.
+
+<img src="assets/qr-web.png" width="200" alt="QR code: Saff web app">
+
+Everything works except lock-screen notifications. The adhan popup still appears in the app.
+
+## Play the demo (either option)
+
+1. On onboarding, pick a campus and tap **Continue**. The fields are prefilled.
+2. On the **Home** tab, **long-press the "Saff" wordmark** and tap **Play demo**.
+3. In Expo Go, lock the phone. About 3s later the adhan notification arrives. Tap it.
+4. The "It's Asr" popup appears. Tap **Yes, I'm free**, and the **Chat** tab opens as 4 people join.
+5. Tap a spot chip, then an avatar (LinkedIn/Instagram). Tap **We prayed**, and the streak goes from 6 to 7.
+6. Long-press "Saff" and tap **Reset** to replay.
+
+## Shipping changes (after you push code)
 
 ```bash
-git clone https://github.com/chheangg/Saff.git
-cd Saff
-npm install
-npx expo start --tunnel     # campus Wi-Fi blocks LAN, so always use --tunnel here
+git pull --rebase
+npm run publish:app -- "what changed"   # updates the Expo Go link for everyone (~1 min)
+npm run deploy:web                      # updates saff-sand.vercel.app (~1 min)
+git push
 ```
 
-Scan the QR code in the terminal with the iPhone camera (Android: scan it from Expo Go). Save a file and the phone reloads.
+Publishing needs the Expo account `evanlyy168` and the Vercel team `nichetrack`. If you're not logged in, ping Evan to publish.
 
-Stuck on "Opening project…" for more than 2 minutes? Stop with Ctrl+C, run `npx expo start --tunnel --clear`, and make sure your phone has signal.
+## Developing locally (only if you're editing code)
 
-## Play the demo
+```bash
+git clone https://github.com/chheangg/Saff.git && cd Saff && npm install
+npx expo start --tunnel     # campus Wi-Fi blocks LAN, so use --tunnel
+```
 
-1. Tap **Continue** on onboarding (it's prefilled).
-2. **Long-press the "Saff" wordmark** on Home and tap **Play demo**.
-3. Lock the phone. About 3s later the adhan notification arrives. Tap it.
-4. **I'm free** → pulse fills with 4 brothers → chat opens automatically → tap a spot chip → tap an avatar → **We prayed** → streak goes 6 → 7.
-5. Long-press "Saff" → **Reset** to replay.
+If the tunnel is blocked on your laptop (like Ali's), skip it. Push your branch and ping Evan to publish, then reopen Expo Go from Option 1. Or test in a browser with `npx expo start --web`.
 
 ## The contract
 
-Who owns what, so nobody edits the same file at once.
-
-| Person | Files | Notes |
+| Person | Owns | Files |
 | --- | --- | --- |
-| **Ibrahim** (frontend + demo) | `src/screens/Takeover.js`, `Matching.js`, `Chat.js`, `Sheets.js`, `src/data.js` | Demo pacing: `JOIN_TIMES` and `CHAT_SCRIPT` in `src/data.js`; chat message spacing is in `playChat` in `src/store.js`. Records the 60s video. |
-| **Evan** (frontend + backend) | `src/screens/Onboarding.js`, `Home.js`, `src/live.js`, `App.js` | Owns live-mode wiring. |
-| **Ali** (backend + deploy) | `server/` | Deploys the server, shares the URL for `EXPO_PUBLIC_SERVER_URL`. |
-| Shared, ask first | `src/store.js`, `src/ui.js`, `src/theme.js` | Ping the group chat before changing these. |
+| **Ibrahim** | Frontend + demo | `src/TabBar.js`, `src/screens/Takeover.js`, `ChatTab.js`, `Chat.js`, `Matching.js`, `Food.js`, `Profile.js`, `Sheets.js`, `src/data.js` (demo pacing: `JOIN_TIMES`, `CHAT_SCRIPT`). Records the 60s video. |
+| **Evan** | Frontend + backend | `src/screens/Onboarding.js`, `Home.js`, `src/live.js`, `src/persist.js`, `App.js`, publishing. |
+| **Ali** | Backend + deploy | `server/`. Puts the server online and shares the URL for `EXPO_PUBLIC_SERVER_URL`. |
+| Shared, ask first | | `src/store.js`, `src/ui.js`, `src/theme.js`, `app.json`, `package.json` |
 
-**State and actions** (`src/store.js`). Screens read `state` and call `dispatch`. Don't add new state shapes without telling the others.
+**State and actions** (`src/store.js`): screens read `state` and call `dispatch`.
 
 ```js
 state = {
-  onboarded, me,               // me: { id:'me', name, gender, major, year, linkedin, instagram, streak, prayedToday }
-  adhan,                       // { key:'asr', label:'Asr', timeLabel:'2:31 PM', at } or null
-  response,                    // null | 'free' | 'no' | 'prayed'
-  group: { members: [user], messages: [{ id, userId, text, at }], expiresAt },
-  chatOpen, streakSheet, profile,
+  onboarded, tab,          // tab: 'home' | 'chat' | 'food' | 'profile'
+  me,                      // { id:'me', name, campus, gender, major, year, linkedin, instagram, streak, prayedToday }
+  adhan,                   // { key:'asr', label:'Asr', timeLabel:'2:31 PM', at } or null
+  response,                // null | 'free' | 'no' | 'prayed'
+  group: { members, messages: [{ id, userId, text, at }], expiresAt, spot, spotStats },
+  streakSheet, profile, network,   // network: { prayers, campuses }
 }
-// actions
-ONBOARD {profile} · ADHAN {prayer} · RESPOND {answer:'free'|'no'} · JOIN {user} · OPEN_CHAT
-MESSAGE {userId, text} · PRAYED · CLOSE_STREAK · PROFILE {user|null} · GROUP {group} · ME {me} · RESET
+// actions: ONBOARD · HYDRATE · TAB · ADHAN · RESPOND · JOIN · OPEN_CHAT · MESSAGE · PIN_SPOT
+//          PRAYED · CLOSE_STREAK · PROFILE · GROUP · ME · NETWORK · RESET
 ```
 
-**Which screen shows** (`App.js`): not onboarded → Onboarding; adhan and no response → Takeover; response `free` → Matching, then Chat once `chatOpen`; otherwise Home. Streak and Profile are sheets on top.
+**Server events** (live mode, `server/index.js`): the client sends `join`, `free`, `message`, `spot`, `prayed`, and the server sends `adhan`, `group`, `me`, `network`.
 
-**Server events** (live mode only, `server/index.js`): the client sends `join`, `free`, `message`, `prayed`, and the server sends `adhan`, `group`, `me`.
+**Design:** black, white, and grays, with one green accent `#06C167`. One primary button per screen. Use the components in `src/ui.js`.
 
-**Design rules:** black/white/grays + one green accent `#06C167` (from `src/theme.js`). One primary button per screen. Use `Button`, `Avatar`, `Sheet`, `PopIn` from `src/ui.js` and don't add new colors.
+**Web-safe rules:** `Alert.alert` does nothing on web, so use a `Sheet`. Notifications and haptics must be optional, guarded by `Platform.OS !== 'web'` or `.catch(() => {})`.
 
-**Git:** pull before you start, commit small, push often. `git pull --rebase && git push`.
+**Git:** pull before you start, commit small, push often.
