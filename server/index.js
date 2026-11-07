@@ -1,5 +1,6 @@
-// Saff realtime server: adhan scheduler + per-prayer group chats + streaks.
-// In-memory by design (hackathon). Run: npm start  (PORT, ADMIN_KEY env vars)
+// Saff realtime server: adhan scheduler + per-campus, per-gender group chats,
+// meetup-spot memory, streaks, and Manara network stats.
+// In-memory with a JSON snapshot (hackathon). Run: npm start  (PORT, ADMIN_KEY, DB_FILE env vars)
 import express from 'express';
 import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
@@ -12,38 +13,49 @@ const DB_FILE = process.env.DB_FILE || new URL('./data.json', import.meta.url).p
 const ADMIN_KEY = process.env.ADMIN_KEY || 'saff';
 const TZ = 'America/Los_Angeles';
 const GROUP_MS = 30 * 60 * 1000;
-const UCSD = new Coordinates(32.8801, -117.234);
+const COORDS = new Coordinates(32.8801, -117.234); // all Manara campuses are in San Diego
 const PRAYERS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 const LABEL = { fajr: 'Fajr', dhuhr: 'Dhuhr', asr: 'Asr', maghrib: 'Maghrib', isha: 'Isha' };
+const CAMPUSES = ['ucsd', 'sdsu', 'mesa', 'usd']; // keep in sync with src/data.js
 
 const app = express();
 app.use(express.json());
 const http = createServer(app);
 const io = new Server(http, { cors: { origin: '*' } });
 
-// ---------- state ----------
-const users = new Map(); // id -> user (persisted to DB_FILE so streaks survive restarts)
+// ---------- persisted state ----------
+const users = new Map(); // id -> user
+let spotCounts = {}; // `${campus}:${gender}` -> { spotId: count }
+let lastSpot = {}; // `${campus}:${gender}:${prayer}` -> spotId
 try {
-  for (const u of JSON.parse(readFileSync(DB_FILE, 'utf8')).users ?? []) users.set(u.id, u);
+  const db = JSON.parse(readFileSync(DB_FILE, 'utf8'));
+  for (const u of db.users ?? []) users.set(u.id, u);
+  spotCounts = db.spotCounts ?? {};
+  lastSpot = db.lastSpot ?? {};
   console.log(`[db] loaded ${users.size} users`);
 } catch {}
+
 let saveTimer = null;
 function save() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     try {
-      writeFileSync(DB_FILE + '.tmp', JSON.stringify({ users: [...users.values()] }));
+      writeFileSync(DB_FILE + '.tmp', JSON.stringify({ users: [...users.values()], spotCounts, lastSpot }));
       renameSync(DB_FILE + '.tmp', DB_FILE);
     } catch (e) {
       console.error('[db] save failed', e.message);
     }
   }, 500);
 }
-let adhan = null; // { key, label, timeLabel, at }
-let groups = { brother: emptyGroup(), sister: emptyGroup() };
 
-function emptyGroup() {
-  return { members: [], messages: [], expiresAt: null };
+// ---------- live state (resets every adhan) ----------
+let adhan = null; // { key, label, timeLabel, at }
+let groups = new Map(); // `${campus}:${gender}` -> { members, messages, expiresAt, spot }
+
+const roomOf = (u) => `${u.campus}:${u.gender}`;
+function groupOf(room) {
+  if (!groups.has(room)) groups.set(room, { members: [], messages: [], expiresAt: null, spot: null });
+  return groups.get(room);
 }
 
 // ---------- time helpers (always Pacific, regardless of server TZ) ----------
@@ -53,27 +65,49 @@ const timeLabel = (d) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute
 
 function prayerTimes(key = dayKey()) {
   const [y, m, d] = key.split('-').map(Number);
-  const pt = new PrayerTimes(UCSD, new Date(y, m - 1, d), CalculationMethod.NorthAmerica());
+  const pt = new PrayerTimes(COORDS, new Date(y, m - 1, d), CalculationMethod.NorthAmerica());
   return PRAYERS.map((p) => ({ key: p, label: LABEL[p], time: pt[p] }));
 }
 
 // ---------- views ----------
-const pub = ({ id, name, gender, major, year, linkedin, instagram, streak, prayedToday }) =>
-  ({ id, name, gender, major, year, linkedin, instagram, streak, prayedToday });
+const pub = ({ id, name, gender, campus, major, year, linkedin, instagram, streak, prayedToday }) =>
+  ({ id, name, gender, campus, major, year, linkedin, instagram, streak, prayedToday });
 
-function view(gender) {
-  const g = groups[gender];
-  return { ...g, members: g.members.map((id) => users.get(id)).filter(Boolean).map(pub) };
+// { spotId: { count, last } } for this room + current prayer
+function spotStats(room) {
+  const counts = spotCounts[room] ?? {};
+  const last = adhan ? lastSpot[`${room}:${adhan.key}`] : null;
+  const stats = {};
+  for (const [id, count] of Object.entries(counts)) stats[id] = { count };
+  if (last) stats[last] = { ...stats[last], count: stats[last]?.count ?? 0, last: true };
+  return stats;
 }
-const emitGroup = (gender) => io.to(gender).emit('group', view(gender));
+
+function view(room) {
+  const g = groupOf(room);
+  return { ...g, members: g.members.map((id) => users.get(id)).filter(Boolean).map(pub), spotStats: spotStats(room) };
+}
+
+function network() {
+  const today = dayKey();
+  let prayers = 0;
+  const active = new Set();
+  for (const u of users.values()) {
+    active.add(u.campus);
+    if (u.lastDay === today) prayers += Object.keys(u.prayedToday ?? {}).length;
+  }
+  return { prayers, campuses: active.size };
+}
+
+const emitGroup = (room) => io.to(room).emit('group', view(room));
+const emitNetwork = () => io.emit('network', network());
 const adhanLive = () => adhan && Date.now() - adhan.at < GROUP_MS;
 
 function fireAdhan(p) {
   adhan = { key: p.key, label: p.label, timeLabel: p.timeLabel, at: Date.now() };
-  groups = { brother: emptyGroup(), sister: emptyGroup() };
+  groups = new Map();
   io.emit('adhan', adhan);
-  emitGroup('brother');
-  emitGroup('sister');
+  for (const room of io.sockets.adapter.rooms.keys()) if (room.includes(':')) emitGroup(room);
   console.log(`[adhan] ${adhan.label} ${adhan.timeLabel} -> ${io.engine.clientsCount} clients`);
 }
 
@@ -87,7 +121,7 @@ function scheduleDay() {
     const ms = p.time - now;
     if (ms > 0) timers.push(setTimeout(() => fireAdhan({ ...p, timeLabel: timeLabel(p.time) }), ms));
   }
-  // re-plan shortly after the next Pacific midnight (check hourly; cheap and TZ-safe)
+  // re-plan after the next Pacific midnight (hourly check; cheap and TZ-safe)
   const today = dayKey();
   timers.push(setTimeout(function check() {
     if (dayKey() !== today) scheduleDay();
@@ -104,12 +138,12 @@ io.on('connection', (socket) => {
 
   socket.on('join', (p) => {
     if (!p?.id) return;
-    const gender = p.gender === 'sister' ? 'sister' : 'brother';
     const prev = users.get(p.id);
     const u = {
       id: str(p.id, 64),
       name: str(p.name, 40) || 'Student',
-      gender,
+      gender: p.gender === 'sister' ? 'sister' : 'brother',
+      campus: CAMPUSES.includes(p.campus) ? p.campus : 'ucsd',
       major: str(p.major, 60),
       year: str(p.year, 20),
       linkedin: str(p.linkedin),
@@ -120,32 +154,51 @@ io.on('connection', (socket) => {
     };
     users.set(u.id, u);
     save();
-    if (socket.data.gender && socket.data.gender !== gender) socket.leave(socket.data.gender);
+    const room = roomOf(u);
+    if (socket.data.room && socket.data.room !== room) socket.leave(socket.data.room);
     socket.data.id = u.id;
-    socket.data.gender = gender;
-    socket.join(gender);
+    socket.data.room = room;
+    socket.join(room);
     socket.emit('me', pub(u));
     if (adhanLive()) socket.emit('adhan', adhan);
-    socket.emit('group', view(gender));
+    socket.emit('group', view(room));
+    emitNetwork();
   });
 
   socket.on('free', () => {
     const u = me();
     if (!u || !adhanLive()) return;
-    const g = groups[u.gender];
+    const g = groupOf(roomOf(u));
     if (!g.members.includes(u.id)) g.members.push(u.id);
     g.expiresAt ??= Date.now() + GROUP_MS;
-    emitGroup(u.gender);
+    emitGroup(roomOf(u));
   });
 
   socket.on('message', (text) => {
     const u = me();
     const body = str(text, 500).trim();
     if (!u || !body) return;
-    const g = groups[u.gender];
+    const g = groupOf(roomOf(u));
     if (!g.members.includes(u.id)) return;
     g.messages.push({ id: randomUUID(), userId: u.id, text: body, at: Date.now() });
-    emitGroup(u.gender);
+    emitGroup(roomOf(u));
+  });
+
+  // Pin where the group meets. Counted once per group; changing it moves the count.
+  socket.on('spot', (spotId) => {
+    const u = me();
+    const id = str(spotId, 40);
+    if (!u || !id || !adhan) return;
+    const room = roomOf(u);
+    const g = groupOf(room);
+    if (!g.members.includes(u.id) || g.spot === id) return;
+    const counts = (spotCounts[room] ??= {});
+    if (g.spot) counts[g.spot] = Math.max(0, (counts[g.spot] ?? 1) - 1);
+    counts[id] = (counts[id] ?? 0) + 1;
+    g.spot = id;
+    lastSpot[`${room}:${adhan.key}`] = id;
+    save();
+    emitGroup(room);
   });
 
   socket.on('prayed', () => {
@@ -160,17 +213,28 @@ io.on('connection', (socket) => {
     u.prayedToday = { ...u.prayedToday, [adhan.key]: true };
     save();
     socket.emit('me', pub(u));
-    emitGroup(u.gender);
+    emitGroup(roomOf(u));
+    emitNetwork();
   });
 });
 
 // ---------- HTTP ----------
-app.get('/', (_req, res) => res.json({ ok: true, users: users.size, clients: io.engine.clientsCount, adhan, today: prayerTimes().map((p) => `${p.label} ${timeLabel(p.time)}`) }));
+app.get('/', (_req, res) =>
+  res.json({
+    ok: true,
+    users: users.size,
+    clients: io.engine.clientsCount,
+    adhan,
+    network: network(),
+    today: prayerTimes().map((p) => `${p.label} ${timeLabel(p.time)}`),
+  }),
+);
 
 // Manual trigger for testing/demo: POST /adhan?key=saff  {"prayer":"asr"}
 app.post('/adhan', (req, res) => {
   if (req.query.key !== ADMIN_KEY) return res.status(401).json({ error: 'bad key' });
-  const p = prayerTimes().find((x) => x.key === req.body?.prayer) ?? prayerTimes().filter((x) => x.time <= new Date()).at(-1) ?? prayerTimes()[4];
+  const all = prayerTimes();
+  const p = all.find((x) => x.key === req.body?.prayer) ?? all.filter((x) => x.time <= new Date()).at(-1) ?? all[4];
   fireAdhan({ ...p, timeLabel: timeLabel(p.time) });
   res.json({ ok: true, adhan });
 });

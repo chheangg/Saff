@@ -5,6 +5,7 @@ import { C, T } from '../theme';
 import { Avatar, Button, PrayerDots, Sheet } from '../ui';
 import { useStore } from '../store';
 import { nextPrayer } from '../prayer';
+import { campusOf } from '../data';
 
 export function StreakSheet() {
   const { state, dispatch } = useStore();
@@ -52,7 +53,7 @@ export function ProfileSheet() {
             <Text style={[T.body, { color: C.g700 }]}>
               {u.major} · {u.year}
             </Text>
-            <Text style={T.meta}>🔥 {u.streak}-day streak · UC San Diego</Text>
+            <Text style={T.meta}>🔥 {u.streak}-day streak · {campusOf(u.campus ?? state.me.campus).name}</Text>
           </View>
           <View style={{ flexDirection: 'row', gap: 8 }}>
             {!!u.linkedin && <Button title="LinkedIn" style={{ flex: 1 }} onPress={() => Linking.openURL(u.linkedin)} />}

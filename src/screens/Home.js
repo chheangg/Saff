@@ -70,6 +70,15 @@ export default function Home() {
 
         <View style={s.row}>
           <View style={{ flex: 1 }}>
+            <Text style={T.meta}>Today across the Manara network</Text>
+            <Text style={[T.body, { fontWeight: '600' }]}>
+              {state.network.prayers} jama'ah prayers · {state.network.campuses} campuses
+            </Text>
+          </View>
+        </View>
+
+        <View style={s.row}>
+          <View style={{ flex: 1 }}>
             <Text style={[T.body, { fontWeight: '600' }]}>Ping me at every adhan</Text>
             <Text style={T.meta}>Only {me.gender}s within 10 min walk</Text>
           </View>

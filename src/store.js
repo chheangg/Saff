@@ -1,10 +1,11 @@
 import { createContext, useContext } from 'react';
 import * as Notifications from 'expo-notifications';
-import { ME, BOTS, JOIN_TIMES, CHAT_SCRIPT, REPLY } from './data';
+import { ME, BOTS, JOIN_TIMES, CHAT_SCRIPT, REPLY, DEMO_SPOT_STATS, DEMO_NETWORK } from './data';
 import { currentPrayer, fmtTime, times } from './prayer';
 
 const GROUP_MS = 30 * 60 * 1000;
-const emptyGroup = () => ({ members: [], messages: [], expiresAt: null });
+// spotStats: { spotId: { count, last } } from the server (demo: seeded stand-ins)
+const emptyGroup = () => ({ members: [], messages: [], expiresAt: null, spot: null, spotStats: { ...DEMO_SPOT_STATS } });
 
 export const initialState = {
   onboarded: false,
@@ -15,6 +16,7 @@ export const initialState = {
   chatOpen: false,
   streakSheet: null, // { from, to }
   profile: null, // user shown in profile sheet
+  network: { ...DEMO_NETWORK }, // { prayers, campuses } across the Manara network today
 };
 
 let msgId = 0;
@@ -45,10 +47,20 @@ export function reducer(s, a) {
     case 'PRAYED': {
       const from = s.me.streak;
       const me = { ...s.me, streak: from + 1, prayedToday: { ...s.me.prayedToday, [s.adhan.key]: true } };
-      return { ...s, me, response: 'prayed', chatOpen: false, streakSheet: { from, to: me.streak } };
+      const network = { ...s.network, prayers: s.network.prayers + 1 }; // live mode: server overwrites
+      return { ...s, me, network, response: 'prayed', chatOpen: false, streakSheet: { from, to: me.streak } };
     }
     case 'CLOSE_STREAK':
       return { ...s, streakSheet: null };
+    case 'PIN_SPOT': {
+      if (s.group.spot === a.spotId) return s;
+      const stats = { ...s.group.spotStats };
+      if (s.group.spot && stats[s.group.spot]) stats[s.group.spot] = { ...stats[s.group.spot], count: Math.max(0, stats[s.group.spot].count - 1) };
+      stats[a.spotId] = { ...stats[a.spotId], count: (stats[a.spotId]?.count ?? 0) + 1 };
+      return { ...s, group: { ...s.group, spot: a.spotId, spotStats: stats } };
+    }
+    case 'NETWORK':
+      return { ...s, network: a.network };
     case 'GROUP':
       return { ...s, group: a.group };
     case 'ME':

@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { C } from '../theme';
 import { Avatar, Button, PopIn } from '../ui';
 import { useStore } from '../store';
+import { campusOf } from '../data';
 
 export default function Takeover() {
   const { state, dispatch } = useStore();
@@ -21,7 +22,7 @@ export default function Takeover() {
         <View style={{ gap: 8, marginTop: 48 }}>
           <Text style={{ color: C.accent, fontSize: 13, fontWeight: '700', letterSpacing: 2 }}>ADHAN</Text>
           <Text style={{ color: C.white, fontSize: 72, fontWeight: '800', letterSpacing: -2 }}>{adhan.label}</Text>
-          <Text style={{ color: C.g300, fontSize: 18 }}>{adhan.timeLabel} · UC San Diego</Text>
+          <Text style={{ color: C.g300, fontSize: 18 }}>{adhan.timeLabel} · {campusOf(me.campus).name}</Text>
         </View>
 
         <View style={{ gap: 16 }}>

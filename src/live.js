@@ -27,18 +27,21 @@ export function connectLive(dispatch, getMe, id) {
         messages: g.messages.map((m) => ({ ...m, userId: local(m.userId) })),
       },
     });
+  const onNetwork = (n) => dispatch({ type: 'NETWORK', network: n });
   const onMe = (u) => dispatch({ type: 'ME', me: { streak: u.streak, prayedToday: u.prayedToday } });
 
   live.on('connect', join);
   live.on('adhan', onAdhan);
   live.on('group', onGroup);
   live.on('me', onMe);
+  live.on('network', onNetwork);
   live.connect();
   return () => {
     live.off('connect', join);
     live.off('adhan', onAdhan);
     live.off('group', onGroup);
     live.off('me', onMe);
+    live.off('network', onNetwork);
     live.disconnect();
   };
 }
@@ -51,4 +54,5 @@ export function mirror(action) {
   if (action.type === 'RESPOND' && action.answer === 'free') live.emit('free');
   if (action.type === 'MESSAGE' && action.userId === 'me') live.emit('message', action.text);
   if (action.type === 'PRAYED') live.emit('prayed');
+  if (action.type === 'PIN_SPOT') live.emit('spot', action.spotId);
 }
