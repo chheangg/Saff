@@ -17,7 +17,11 @@ const local = (id) => (id === deviceId ? 'me' : id);
 export function connectLive(dispatch, getMe, id) {
   if (!live) return () => {};
   deviceId = id;
-  const join = () => live.emit('join', { ...getMe(), id: deviceId });
+  // Only register with the server after onboarding, so nobody joins as the placeholder profile.
+  const join = () => {
+    const me = getMe();
+    if (me) live.emit('join', { ...me, id: deviceId });
+  };
   const onAdhan = (prayer) => !isDemoActive() && dispatch({ type: 'ADHAN', prayer });
   const onGroup = (g) =>
     !isDemoActive() &&

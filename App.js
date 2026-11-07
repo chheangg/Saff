@@ -38,6 +38,8 @@ export default function App() {
   const store = useMemo(() => ({ state, dispatch }), [state]);
   const meRef = useRef(state.me);
   meRef.current = state.me;
+  const onboardedRef = useRef(false);
+  onboardedRef.current = state.onboarded;
 
   const [deviceId, setDeviceId] = useState(null);
 
@@ -48,7 +50,7 @@ export default function App() {
       setDeviceId(saved.deviceId);
     });
   }, []);
-  useEffect(() => (deviceId ? connectLive(rawDispatch, () => meRef.current, deviceId) : undefined), [deviceId]);
+  useEffect(() => (deviceId ? connectLive(rawDispatch, () => (onboardedRef.current ? meRef.current : null), deviceId) : undefined), [deviceId]);
   useEffect(() => {
     if (deviceId && !isDemoActive()) save({ deviceId, onboarded: state.onboarded, me: state.me });
   }, [deviceId, state.onboarded, state.me]);
