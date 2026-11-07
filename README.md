@@ -28,6 +28,16 @@ Borrowed from Uber's [Base design system](https://base.uber.com). It's the quiet
 5. **Group chat:** expiry timer, spot chips (Price Center prayer room, Geisel 2nd floor, Library Walk), messages
 6. **Profile sheet:** name, major, year, LinkedIn and Instagram buttons
 
+**Jama'ah streak (borrowed from Duolingo)**
+
+A streak counts consecutive days on which you prayed at least one prayer in congregation through Saff. It's Duolingo's retention mechanic, applied to salah.
+
+- **How it counts:** after the chat, everyone taps **We prayed**. That check-in adds +1 for the day. One jama'ah a day keeps the streak alive.
+- **Home:** a flame + "7-day streak" under the countdown, plus 5 dots for today's prayers (Fajr to Isha). Each dot fills green when prayed with a group.
+- **Check-in sheet:** the flame pops and the number ticks up (6 → 7). This is the only celebratory animation in the app.
+- **Group touch:** the chat header shows each person's streak beside their avatar.
+- **Kept minimal:** no leagues, gems, or freezes. The flame uses the same green accent.
+
 ## Tech stack: one Replit, one repo, zero accounts
 
 | Layer | Pick | Why |
@@ -52,8 +62,8 @@ The only shared contract is the `state` shape and the socket events. Agree on bo
 
 | Person | Owns | Deliverables |
 | --- | --- | --- |
-| **Evan** | Frontend + design | Tailwind tokens. All 6 screens wired to `state` |
-| **Ibrahim** | Server + realtime + demo | Express + Socket.IO. Events `join`, `adhan`, `free`, `message`, `reset`. Brother/sister groups, 30-min expiry, "Trigger adhan" route. `?demo=1` scripted timeline + Reset (bots join, timed messages) using Ali's seed data |
+| **Evan** | Frontend + design | Tailwind tokens. All 6 screens wired to `state`. Streak flame + prayer dots on Home, "We prayed" +1 sheet |
+| **Ibrahim** | Server + realtime + demo | Express + Socket.IO. Events `join`, `adhan`, `free`, `message`, `reset`. Brother/sister groups, 30-min expiry, "Trigger adhan" route. `?demo=1` scripted timeline + Reset (bots join, timed messages) using Ali's seed data. Streak counter ("We prayed" bumps it; the demo user starts at 6) |
 | **Ali** | Replit + content + pitch | Replit setup + deploy + QR code. `adhan` times. Seed data: 8 profiles, 5 UCSD spots. Adhan audio. Slides, script, judge-feedback log (consult ≥ 2 judges) |
 
 **Timeline**
@@ -68,7 +78,7 @@ The only shared contract is the `state` shape and the socket events. Agree on bo
 ## Demo script (2 min)
 
 1. **Hook (15s):** "At UCSD you see people partying or studying. You rarely see someone stepping out to pray."
-2. **Replay (45s):** `?demo=1` on the projector: adhan → takeover → I'm free → pulse fills → chat → spot suggested → profile → LinkedIn.
+2. **Replay (45s):** `?demo=1` on the projector: adhan → takeover → I'm free → pulse fills → chat → spot suggested → profile → LinkedIn → **We prayed**, streak 6 → 7.
 3. **Live (40s):** QR code on screen, judges join, "Trigger adhan", every phone lights up, judges appear in the group.
 4. **Close (20s):** Deen & Dunya fit. Next: ucsd.edu verification, native push, a Manara network across campuses.
 
