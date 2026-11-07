@@ -56,11 +56,7 @@ If the tunnel is blocked on your laptop (like Ali's), skip it. Push your branch 
 
 The server is live on Replit at **https://saff-alimran13.replit.app**. It's always on and fires the adhan at real San Diego prayer times. Open the link to see today's times and how many people are connected.
 
-**Use it locally:** run `cp .env.example .env` and restart Expo. The app then joins real groups with everyone else instead of running the scripted demo. To go back to offline demo mode, delete `.env`. `.env` is gitignored, so each person makes their own.
-
-**Use it in the published apps (Evan):** `.env` isn't uploaded when publishing, so set `EXPO_PUBLIC_SERVER_URL=https://saff-alimran13.replit.app` once in each place, then republish:
-- Expo: expo.dev, project **Environment variables**, **production** environment (that's what `publish:app` uses)
-- Vercel: project **Settings → Environment Variables**, **Production**
+**The app connects to it by default** (`src/live.js`), locally and in both published links. No `.env` needed. To force offline-only, set `EXPO_PUBLIC_SERVER_URL=off`. **Play demo** still works on top of live mode: while the demo runs, the app ignores server events.
 
 **Fire an adhan now (for testing or the demo):** open **https://saff-alimran13.replit.app/admin** on your phone, enter `ADMIN_KEY` once, and tap a prayer. The page also shows who has joined each group in real time. Or use curl:
 
@@ -76,7 +72,7 @@ Ask Ali for `ADMIN_KEY`. It's a Replit Secret and never goes in git. Every phone
 
 | Person | Owns | Files |
 | --- | --- | --- |
-| **Ibrahim** | Frontend + demo | `src/TabBar.js`, `src/screens/Takeover.js`, `ChatTab.js`, `Chat.js`, `Matching.js`, `Food.js`, `Profile.js`, `Sheets.js`, `src/data.js` (demo pacing: `JOIN_TIMES`, `CHAT_SCRIPT`). Records the 60s video. |
+| **Ibrahim** | Frontend + demo + design | `design/saff.pen` (see Design handoff below), `src/TabBar.js`, `src/screens/Takeover.js`, `ChatTab.js`, `Chat.js`, `Matching.js`, `Food.js`, `Profile.js`, `Sheets.js`, `src/data.js` (demo pacing: `JOIN_TIMES`, `CHAT_SCRIPT`). Records the 60s video. |
 | **Evan** | Frontend + app side of live mode | `src/screens/Onboarding.js`, `Home.js`, `src/live.js` (socket client), `src/persist.js`, `App.js`, publishing (Expo + Vercel). |
 | **Ali** | Server + deploy | `server/`, `.replit`, the Replit deployment and its `ADMIN_KEY`. Server is live at https://saff-alimran13.replit.app. |
 | Shared, ask first | | `src/store.js`, `src/ui.js`, `src/theme.js`, `app.json`, `package.json` |
@@ -112,7 +108,39 @@ Groups are per **campus + gender** (for example `ucsd:brother`). An adhan opens 
 | server → app | `me` | your user: `{ id, name, gender, campus, major, year, linkedin, instagram, streak, prayedToday }` |
 | server → app | `network` | `{ prayers, campuses }` today across all campuses |
 
-**Design:** black, white, and grays, with one green accent `#06C167`. One primary button per screen. Use the components in `src/ui.js`.
+## Design handoff (Pencil)
+
+The source of truth is **`design/saff.pen`**. Open it in the Pen app (pen.dev), signed in. To let Claude Code edit it, add the Pencil MCP server once:
+
+```bash
+claude mcp add pencil -- /Applications/Pen.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64 --app desktop
+```
+
+**Done (Evan, and matching the app):** Home (light + dark), Adhan popup, Chat, Streak celebration, and the reusable Status Bar and Tab Bar components. Variables hold the tokens, with a `mode: light|dark` theme.
+
+**Next (Ibrahim):**
+- [ ] Design Onboarding, Matching, Halal Food, Profile, and the Chat empty state in the same style, then port them to code.
+- [ ] Add dark variants for the Popup, Chat, and Streak screens: copy the frame and set `theme: {mode: "dark"}`.
+- [ ] Record the 60s video. Use `EXPO_PUBLIC_THEME=dark` or `light` to pin a theme.
+
+**Tokens** (`src/theme.js` mirrors the .pen variables):
+
+| Token | Light | Dark | Use |
+| --- | --- | --- | --- |
+| ink (`C.black`) | `#0B0B0F` | `#F4F4F5` | text |
+| surface (`C.white`) | `#FFFFFF` | `#17171C` | cards, bubbles, sheets |
+| canvas | `#F4F4F2` | `#0B0B0F` | screen background |
+| accent | `#10B981` | same | "free / prayed", primary CTA |
+| brand | `#6366F1` | same | active tab, your bubbles, current prayer |
+| flame | `#F97316` | same | streak |
+| onColor | `#FFFFFF` | same | text/icons on accent, brand, flame, avatars |
+
+**Rules:**
+- Geist font (Geist Mono for small uppercase labels).
+- Cards are borderless (`CARD` in theme.js), with no outlines.
+- Use pills for chips and buttons. One primary action per screen. Keep copy to a few words.
+- Never put `C.white` text on a colored fill. Use `C.onColor`, because `C.white` turns dark in dark mode.
+- Mascot PNGs are in `assets/mascot/`.
 
 **Web-safe rules:** `Alert.alert` does nothing on web, so use a `Sheet`. Notifications and haptics must be optional, guarded by `Platform.OS !== 'web'` or `.catch(() => {})`.
 
