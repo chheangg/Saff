@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -37,6 +37,13 @@ export default function Matching() {
   const { state, dispatch } = useStore();
   const { me, group } = state;
   const others = group.members.filter((u) => u.id !== 'me');
+  // Live groups can start with just you: let the first person in after a moment instead of blocking.
+  const [canEnterAlone, setCanEnterAlone] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setCanEnterAlone(true), 4000);
+    return () => clearTimeout(t);
+  }, []);
+  const n = others.length;
 
   useEffect(() => {
     if (others.length) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
@@ -50,8 +57,8 @@ export default function Matching() {
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: C.canvas }}>
       <View style={{ flex: 1, padding: 24, justifyContent: 'space-between' }}>
         <View style={{ gap: 6, marginTop: 24 }}>
-          <Text style={T.h1}>{others.length ? `${others.length} ${me.gender}s are free` : `Finding ${me.gender}s nearby…`}</Text>
-          <Text style={[T.body, { color: C.g700 }]}>Group chat · closes in 30 min</Text>
+          <Text style={T.h1}>{n ? `${n} ${me.gender}${n > 1 ? 's are' : ' is'} free` : canEnterAlone ? "You're first" : `Finding ${me.gender}s nearby…`}</Text>
+          <Text style={[T.body, { color: C.g700 }]}>{!n && canEnterAlone ? `Others join as they say yes` : 'Group chat · closes in 30 min'}</Text>
         </View>
 
         <View style={{ height: 2 * R + 80, alignItems: 'center', justifyContent: 'center' }}>
@@ -71,7 +78,7 @@ export default function Matching() {
           ))}
         </View>
 
-        <Button title="Open group chat" disabled={!others.length} onPress={() => dispatch({ type: 'OPEN_CHAT' })} />
+        <Button title="Open group chat" disabled={!n && !canEnterAlone} onPress={() => dispatch({ type: 'OPEN_CHAT' })} />
       </View>
     </SafeAreaView>
   );

@@ -8,14 +8,18 @@ import { campusOf } from '../data';
 import { botReply, playChat, useStore } from '../store';
 import { fmtIn } from '../prayer';
 import MapCard from '../MapCard';
+import { useWalkTimes } from '../location';
 
 export default function Chat() {
   const { state, dispatch } = useStore();
   const { me, adhan, group } = state;
-  const campusSpots = campusOf(me.campus).spots;
+  // Real walk times from your location (asked once, here; stays on the phone).
+  const { spots: campusSpots, located } = useWalkTimes(campusOf(me.campus).spots, { ask: true });
   const stat = (id) => group.spotStats?.[id] ?? {};
   // Spots your group has used most come first; the one used last time for this prayer leads.
-  const spots = [...campusSpots].sort((a, b) => (stat(b.id).last ? 1e6 : 0) + (stat(b.id).count ?? 0) - ((stat(a.id).last ? 1e6 : 0) + (stat(a.id).count ?? 0)));
+  // Last spot for this prayer leads; then nearest (when we know where you are) or most used.
+  const rank = (p) => (stat(p.id).last ? -1e6 : 0) + (located ? p.walk : -(stat(p.id).count ?? 0));
+  const spots = [...campusSpots].sort((a, b) => rank(a) - rank(b));
   const pinned = campusSpots.find((p) => p.id === group.spot);
   const [text, setText] = useState('');
   const [now, setNow] = useState(Date.now());

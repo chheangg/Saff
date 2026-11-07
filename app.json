@@ -45,6 +45,12 @@
             "backgroundColor": "#0B0B0F"
           }
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Saff uses your location to show walk times to prayer spots. It stays on your phone."
+        }
       ]
     ],
     "extra": {

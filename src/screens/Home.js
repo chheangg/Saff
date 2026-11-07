@@ -9,6 +9,7 @@ import { playDemo, stopDemo, useStore } from '../store';
 import { disableAlerts } from '../alerts';
 import { currentPrayer, fmtIn, fmtTime, nextPrayer } from '../prayer';
 import { campusOf } from '../data';
+import { useWalkTimes } from '../location';
 
 const MOON = require('../../assets/mascot/moon-sleepy.png');
 
@@ -125,11 +126,12 @@ function LiveCard({ now }) {
     return () => loop.stop();
   }, []);
 
+  const { spots } = useWalkTimes(campusOf(me.campus).spots);
   const open = adhan && now - adhan.at < 30 * 60 * 1000 && response !== 'prayed';
   const others = group.members.filter((u) => u.id !== 'me');
   if (!open || (!others.length && response !== 'free')) return null;
 
-  const spot = campusOf(me.campus).spots.find((p) => p.id === group.spot);
+  const spot = spots.find((p) => p.id === group.spot);
   const mins = Math.max(0, Math.round((now - adhan.at) / 60000));
   const inGroup = response === 'free';
   const n = others.length;

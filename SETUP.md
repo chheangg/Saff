@@ -134,6 +134,8 @@ claude mcp add pencil -- /Applications/Pen.app/Contents/Resources/app.asar.unpac
 - [x] Adhan alerts are on by default after onboarding. The app asks for permission and schedules today's 5 prayers on the phone, so they work offline and with the app closed. The Home switch opts out.
 - [x] Push: the app sends its Expo push token in `join` (`pushToken`). `POST /adhan` (the admin page) now also pushes to every registered phone, so closed apps get it too. Ali reviewed it: each phone gets exactly one push (a reinstall moves the token to the new account), uninstalled phones are dropped, and Expo calls time out after 10s. `npm test` covers this with a fake Expo service. **Ali: redeploy on Replit.**
 - [x] **Edit profile + sign out** (Profile tab): change name, campus, brother/sister, and links. Changes rejoin the server right away. Sign out wipes the device and returns to onboarding.
+- [x] **First one in isn't stuck:** in a live group, Matching lets you open the chat alone after 4s ("You're first").
+- [x] **Real walk times:** the chat asks for location once and computes minutes to each spot (straight-line × 1.2 at 80 m/min). Spots sort last-used first, then nearest. Location never leaves the phone. When you're more than 3 km from campus, it keeps the default estimates.
 - [ ] Two-phone live test at a real prayer time. The server fires on its own, no admin key needed.
 
 **Tokens** (`src/theme.js` mirrors the .pen variables):
