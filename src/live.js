@@ -2,6 +2,7 @@
 // Without it, the app runs fully offline in demo mode.
 import { io } from 'socket.io-client';
 import { isDemoActive } from './store';
+import { getPushToken } from './alerts';
 
 // Ali's Replit deployment; override with EXPO_PUBLIC_SERVER_URL (set it to 'off' for offline-only).
 const ENV = process.env.EXPO_PUBLIC_SERVER_URL;
@@ -20,7 +21,7 @@ export function connectLive(dispatch, getMe, id) {
   // Only register with the server after onboarding, so nobody joins as the placeholder profile.
   const join = () => {
     const me = getMe();
-    if (me) live.emit('join', { ...me, id: deviceId });
+    if (me) live.emit('join', { ...me, id: deviceId, pushToken: getPushToken() });
   };
   const onAdhan = (prayer) => !isDemoActive() && dispatch({ type: 'ADHAN', prayer });
   const onGroup = (g) =>
@@ -52,7 +53,7 @@ export function connectLive(dispatch, getMe, id) {
   };
 }
 
-export const rejoin = (me) => live?.connected && live.emit('join', { ...me, id: deviceId });
+export const rejoin = (me) => live?.connected && live.emit('join', { ...me, id: deviceId, pushToken: getPushToken() });
 
 // Mirror the user's own actions to the server (bots/demo never reach here).
 export function mirror(action) {

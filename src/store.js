@@ -93,7 +93,7 @@ export function stopDemo() {
   timers.forEach(clearTimeout);
   timers = [];
   demoActive = false;
-  if (native) Notifications.cancelAllScheduledNotificationsAsync().catch(() => {});
+  if (native) Notifications.cancelScheduledNotificationAsync('saff-demo').catch(() => {});
 }
 
 function adhanContent(prayer, gender) {
@@ -112,6 +112,7 @@ export function playDemo(dispatch, me, delay = 3000) {
   const p = currentPrayer();
   const prayer = { key: p.key, label: p.label, timeLabel: fmtTime(p.time) };
   if (native) Notifications.scheduleNotificationAsync({
+    identifier: 'saff-demo',
     content: adhanContent(prayer, me.gender),
     trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: Math.max(1, delay / 1000) },
   }).catch(() => {});

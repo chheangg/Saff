@@ -3,10 +3,10 @@ import { Animated, Image, Platform, Pressable, ScrollView, StyleSheet, Switch, T
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import * as Notifications from 'expo-notifications';
 import { C, CARD, FLAME, HERO, T } from '../theme';
 import { Avatar, Button, PrayerDots, Sheet } from '../ui';
-import { playDemo, scheduleToday, stopDemo, useStore } from '../store';
+import { playDemo, stopDemo, useStore } from '../store';
+import { disableAlerts } from '../alerts';
 import { currentPrayer, fmtIn, fmtTime, nextPrayer } from '../prayer';
 import { campusOf } from '../data';
 
@@ -16,7 +16,6 @@ export default function Home() {
   const { state, dispatch } = useStore();
   const { me, adhan, response, network } = state;
   const [now, setNow] = useState(new Date());
-  const [notify, setNotify] = useState(false);
   const [menu, setMenu] = useState(false); // hidden presenter menu: long-press the wordmark
 
   useEffect(() => {
@@ -27,12 +26,11 @@ export default function Home() {
   const next = nextPrayer(now);
   const prayedToday = me.lastJamaah === now.toDateString(); // a jama'ah through Saff today
 
+  // Alerts default on (App.js schedules them); this switch just opts out or back in.
+  const notify = me.alerts !== false;
   async function toggleNotify(on) {
-    setNotify(on);
-    if (!on) return Notifications.cancelAllScheduledNotificationsAsync();
-    const { granted } = await Notifications.requestPermissionsAsync();
-    if (granted) scheduleToday(me.gender);
-    else setNotify(false);
+    dispatch({ type: 'ME', me: { alerts: on } });
+    if (!on) disableAlerts();
   }
 
   return (

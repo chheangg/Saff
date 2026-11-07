@@ -6,6 +6,7 @@ import * as Notifications from 'expo-notifications';
 import { Store, initialState, isDemoActive, reducer, startAdhan } from './src/store';
 import { loadSaved, save } from './src/persist';
 import { useAppFonts } from './src/fonts';
+import { enableAlerts } from './src/alerts';
 import { C } from './src/theme';
 import { connectLive, isLive, mirror, rejoin } from './src/live';
 import TabBar from './src/TabBar';
@@ -55,10 +56,14 @@ export default function App() {
     if (deviceId && !isDemoActive()) save({ deviceId, onboarded: state.onboarded, me: state.me });
   }, [deviceId, state.onboarded, state.me]);
   useEffect(() => { if (state.onboarded) rejoin(state.me); }, [state.onboarded, state.me.gender]);
+  // Adhan alerts on by default: schedule today's prayers + register for server push, then tell the server.
+  useEffect(() => {
+    if (!native || !state.onboarded || state.me.alerts === false) return;
+    enableAlerts(state.me.gender).then((ok) => ok && rejoin(meRef.current));
+  }, [state.onboarded, state.me.alerts, state.me.gender]);
 
   useEffect(() => {
     if (!native) return;
-    Notifications.requestPermissionsAsync().catch(() => {});
     // Tapping a real (scheduled) prayer notification opens the adhan flow.
     const sub = Notifications.addNotificationResponseReceivedListener((res) => {
       const prayer = res.notification.request.content.data?.prayer;

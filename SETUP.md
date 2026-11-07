@@ -100,7 +100,7 @@ Groups are per **campus + gender** (for example `ucsd:brother`). An adhan opens 
 
 | Direction | Event | Payload |
 | --- | --- | --- |
-| app → server | `join` | `{ id, name, gender: 'brother'\|'sister', campus: 'ucsd'\|'sdsu'\|'mesa'\|'usd', major, year, linkedin, instagram, streak, prayedToday }`. Sent on connect, after onboarding, and when gender changes; `id` is the device id from `persist.js` |
+| app → server | `join` | `{ id, pushToken?, name, gender: 'brother'\|'sister', campus: 'ucsd'\|'sdsu'\|'mesa'\|'usd', major, year, linkedin, instagram, streak, prayedToday }`. Sent on connect, after onboarding, and when gender changes; `id` is the device id from `persist.js` |
 | app → server | `free` | none. Ignored unless an adhan fired in the last 30 min |
 | app → server | `message` | `text` (string, max 500). Only group members can post |
 | app → server | `spot` | `spotId` (string, a spot id from the campus's `spots` in `src/data.js`) |
@@ -129,6 +129,11 @@ claude mcp add pencil -- /Applications/Pen.app/Contents/Resources/app.asar.unpac
 - [x] **Prayer map:** a map card in the group chat shows where the jama'ah is. It plots the campus spots, highlights the pinned spot in emerald, lets you tap a pin to choose the spot, and has a Directions button that opens Apple or Google Maps. iOS and Android use `react-native-maps`; web uses an OpenStreetMap embed. Spot coordinates in `src/data.js` are approximate, so walk them and fix them.
 - [x] Check the app against `saff.pen` in Pencil. The "Live App (verify)" frame holds a canvas browser on `localhost:5055`. This check caught invisible text in dark mode, now fixed: Text defaults to the theme ink.
 - [x] **Live now card** on Home: front and center while your group's jama'ah is open. It shows the live dot, the prayer, the spot and walk time, who's there, and Join/Open. Designs are "Home · Live (Brothers)" and "(Sisters)". It only ever shows your own campus+gender group.
+
+**Real alerts (Evan, needs Ali to redeploy):**
+- [x] Adhan alerts are on by default after onboarding. The app asks for permission and schedules today's 5 prayers on the phone, so they work offline and with the app closed. The Home switch opts out.
+- [x] Push: the app sends its Expo push token in `join` (`pushToken`). `POST /adhan` (the admin page) now also pushes to every registered phone, so closed apps get it too. **Ali: pull and redeploy on Replit.**
+- [ ] Two-phone live test at a real prayer time. The server fires on its own, no admin key needed.
 
 **Tokens** (`src/theme.js` mirrors the .pen variables):
 

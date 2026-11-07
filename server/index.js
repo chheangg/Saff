@@ -104,6 +104,35 @@ const emitGroup = (room) => io.to(room).emit('group', view(room));
 const emitNetwork = () => io.emit('network', network());
 const adhanLive = () => adhan && Date.now() - adhan.at < GROUP_MS;
 
+// Push the adhan to every phone that registered (reaches closed apps). Each user only hears
+// about their own gender's group. Used for admin-fired adhans; scheduled prayer times are
+// already covered by each phone's local notifications.
+async function pushAdhan(a) {
+  const msgs = [...users.values()]
+    .filter((u) => u.pushToken)
+    .map((u) => ({
+      to: u.pushToken,
+      sound: 'default',
+      title: `${a.label} · ${a.timeLabel}`,
+      body: `Adhan just went off. Free to pray with ${u.gender}s nearby?`,
+      data: { prayer: { key: a.key, label: a.label, timeLabel: a.timeLabel } },
+    }));
+  for (let i = 0; i < msgs.length; i += 100) {
+    try {
+      const r = await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify(msgs.slice(i, i + 100)),
+      });
+      if (!r.ok) console.error('[push] failed', r.status, await r.text());
+    } catch (e) {
+      console.error('[push] error', e.message);
+    }
+  }
+  console.log(`[push] ${a.label} -> ${msgs.length} phones`);
+  return msgs.length;
+}
+
 function fireAdhan(p) {
   adhan = { key: p.key, label: p.label, timeLabel: p.timeLabel, at: Date.now() };
   groups = new Map();
@@ -152,6 +181,8 @@ io.on('connection', (socket) => {
       streak: prev?.streak ?? (Number(p.streak) || 0),
       prayedToday: prev?.prayedToday ?? (p.prayedToday || {}),
       lastDay: prev?.lastDay ?? null,
+      // Expo push token from the app; keep the last good one if this join has none.
+      pushToken: /^Expo(nent)?PushToken\[/.test(p.pushToken ?? '') ? p.pushToken : prev?.pushToken ?? null,
     };
     users.set(u.id, u);
     save();
@@ -265,12 +296,13 @@ app.get('/admin/status', (req, res) => {
 });
 
 // Manual trigger for testing/demo: POST /adhan?key=saff  {"prayer":"asr"}
-app.post('/adhan', (req, res) => {
+app.post('/adhan', async (req, res) => {
   if (!isAdmin(req)) return res.status(401).json({ error: 'bad key' });
   const all = prayerTimes();
   const p = all.find((x) => x.key === req.body?.prayer) ?? all.filter((x) => x.time <= new Date()).at(-1) ?? all[4];
   fireAdhan({ ...p, timeLabel: timeLabel(p.time) });
-  res.json({ ok: true, adhan });
+  const pushed = await pushAdhan(adhan);
+  res.json({ ok: true, adhan, pushed });
 });
 
 http.listen(PORT, () => console.log(`Saff server on :${PORT}`));
