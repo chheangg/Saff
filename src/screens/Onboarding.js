@@ -23,12 +23,12 @@ export default function Onboarding() {
   const valid = p.name.trim() && new RegExp(`[@.]${campus.domain.replace('.', '\\.')}$`, 'i').test(p.email.trim());
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: C.white }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.canvas }}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }} keyboardShouldPersistTaps="handled">
           <Text style={[T.h1, { marginTop: 24 }]}>Pray together.{'\n'}Never alone.</Text>
           <Text style={[T.body, { color: C.g700 }]}>
-            When the adhan goes off, Saff finds Muslims on your campus who are free to pray with you.
+            Find Muslims nearby at every adhan.
           </Text>
 
           <View style={{ gap: 6 }}>

@@ -47,11 +47,11 @@ export default function Matching() {
   }, [others.length]);
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: C.white }}>
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: C.canvas }}>
       <View style={{ flex: 1, padding: 24, justifyContent: 'space-between' }}>
         <View style={{ gap: 6, marginTop: 24 }}>
           <Text style={T.h1}>{others.length ? `${others.length} ${me.gender}s are free` : `Finding ${me.gender}s nearby…`}</Text>
-          <Text style={[T.body, { color: C.g700 }]}>We'll open a group chat for this prayer. It disappears in 30 min.</Text>
+          <Text style={[T.body, { color: C.g700 }]}>Group chat · closes in 30 min</Text>
         </View>
 
         <View style={{ height: 2 * R + 80, alignItems: 'center', justifyContent: 'center' }}>

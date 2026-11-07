@@ -1,6 +1,8 @@
 import { Linking, ScrollView, Text, View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { C, T } from '../theme';
+import { campusOf } from '../data';
 import { Avatar, Button, PrayerDots } from '../ui';
 import { useStore } from '../store';
 
@@ -9,7 +11,7 @@ export default function Profile() {
   const { me } = state;
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: C.white }}>
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: C.canvas }}>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 20 }}>
         <View style={{ alignItems: 'center', gap: 6, marginTop: 16 }}>
           <Avatar user={me} size={96} />
@@ -18,16 +20,18 @@ export default function Profile() {
             {me.major} · {me.year}
           </Text>
           <Text style={T.meta}>
-            {me.email} · {me.gender} · UC San Diego
+            {me.email} · {me.gender} · {campusOf(me.campus).name}
           </Text>
         </View>
 
         <View style={s.card}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Text style={{ fontSize: 34 }}>🔥</Text>
+            <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: C.flameSoft, alignItems: 'center', justifyContent: 'center' }}>
+              <Ionicons name="flame" size={28} color={C.flame} />
+            </View>
             <View>
-              <Text style={T.h2}>{me.streak}-day streak</Text>
-              <Text style={T.meta}>Today's prayers</Text>
+              <Text style={[T.h2, { color: C.flame }]}>{me.streak} day streak</Text>
+              <Text style={T.meta}>Today</Text>
             </View>
           </View>
           <PrayerDots done={me.prayedToday} />
@@ -43,5 +47,5 @@ export default function Profile() {
 }
 
 const s = StyleSheet.create({
-  card: { backgroundColor: C.g50, borderRadius: 12, padding: 16, gap: 16 },
+  card: { backgroundColor: C.white, borderRadius: 28, padding: 16, gap: 16 },
 });

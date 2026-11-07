@@ -11,10 +11,10 @@ const UCSD = '32.8801,-117.2340';
 const openMaps = (q) => Linking.openURL(`http://maps.apple.com/?q=${encodeURIComponent(q)}&sll=${UCSD}`);
 
 const SEARCHES = [
-  { q: 'halal food', title: 'Closest halal food', sub: 'Nearest to campus right now', icon: 'navigate' },
-  { q: 'halal restaurant', title: 'Sit-down halal', sub: 'Restaurants for the group', icon: 'restaurant' },
-  { q: 'halal grill kebab shawarma', title: 'Quick bites', sub: 'Shawarma, kebab, grills', icon: 'flash' },
-  { q: 'halal dessert cafe', title: 'Coffee & dessert', sub: 'Somewhere to keep talking', icon: 'cafe' },
+  { q: 'halal food', title: 'Closest halal food', sub: 'Nearest now', icon: 'navigate' },
+  { q: 'halal restaurant', title: 'Sit-down halal', sub: 'For the group', icon: 'restaurant' },
+  { q: 'halal grill kebab shawarma', title: 'Quick bites', sub: 'Shawarma · kebab', icon: 'flash' },
+  { q: 'halal dessert cafe', title: 'Coffee & dessert', sub: 'Keep talking', icon: 'cafe' },
 ];
 
 export default function Food() {
@@ -27,16 +27,16 @@ export default function Food() {
   }
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: C.white }}>
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: C.canvas }}>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 20 }}>
         <View style={{ gap: 4, marginTop: 8 }}>
           <Text style={T.h1}>Halal food</Text>
-          <Text style={[T.body, { color: C.g700 }]}>Hit it off after prayer? Grab food together. Tap a search and Apple Maps gives you directions.</Text>
+          <Text style={[T.body, { color: C.g700 }]}>Grab food after prayer.</Text>
         </View>
 
         {inGroup && (
           <View style={s.card}>
-            <Text style={T.body}>Your jama'ah is still open. Ask if anyone wants to eat.</Text>
+            <Text style={T.body}>Group still open</Text>
             <Button title="Ask the group" variant="accent" onPress={askGroup} />
           </View>
         )}
@@ -61,8 +61,8 @@ export default function Food() {
 }
 
 const s = StyleSheet.create({
-  card: { backgroundColor: C.g50, borderRadius: 12, padding: 16, gap: 12 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderRadius: 12, backgroundColor: C.g50 },
-  primary: { borderWidth: 2, borderColor: C.black },
-  icon: { width: 44, height: 44, borderRadius: 22, backgroundColor: C.g100, alignItems: 'center', justifyContent: 'center' },
+  card: { backgroundColor: C.white, borderRadius: 28, padding: 16, gap: 12 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderRadius: 24, backgroundColor: C.white },
+  primary: { backgroundColor: C.accentSoft },
+  icon: { width: 44, height: 44, borderRadius: 22, backgroundColor: C.g50, alignItems: 'center', justifyContent: 'center' },
 });

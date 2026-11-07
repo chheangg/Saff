@@ -3,7 +3,9 @@
 import { io } from 'socket.io-client';
 import { isDemoActive } from './store';
 
-const URL = process.env.EXPO_PUBLIC_SERVER_URL;
+// Ali's Replit deployment; override with EXPO_PUBLIC_SERVER_URL (set it to 'off' for offline-only).
+const ENV = process.env.EXPO_PUBLIC_SERVER_URL;
+const URL = ENV === 'off' ? null : ENV || 'https://saff-alimran13.replit.app';
 let deviceId = null; // set from on-device storage before connecting
 
 export const live = URL ? io(URL, { transports: ['websocket'], autoConnect: false }) : null;
@@ -27,7 +29,7 @@ export function connectLive(dispatch, getMe, id) {
         messages: g.messages.map((m) => ({ ...m, userId: local(m.userId) })),
       },
     });
-  const onNetwork = (n) => dispatch({ type: 'NETWORK', network: n });
+  const onNetwork = (n) => !isDemoActive() && dispatch({ type: 'NETWORK', network: n });
   const onMe = (u) => dispatch({ type: 'ME', me: { streak: u.streak, prayedToday: u.prayedToday } });
 
   live.on('connect', join);

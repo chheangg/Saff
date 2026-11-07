@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { C, T } from '../theme';
+import { Ionicons } from '@expo/vector-icons';
+import { C, T, avatarColor } from '../theme';
 import { Avatar, Button } from '../ui';
 import { campusOf } from '../data';
 import { botReply, playChat, useStore } from '../store';
@@ -41,30 +42,25 @@ export default function Chat() {
   const data = [{ id: 'sys', system: true }, ...group.messages];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: C.white }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.canvas }} edges={['top']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={s.header}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-            <View>
-              <Text style={T.h2}>{adhan.label} jama'ah</Text>
-              <Text style={T.meta}>
-                {group.members.length} {me.gender}s · expires in {fmtIn(group.expiresAt - now)}
-              </Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={{ fontSize: 24, fontWeight: '700', letterSpacing: -0.8 }}>{adhan.label} jama'ah</Text>
+            <View style={s.timer}>
+              <Ionicons name="timer-outline" size={15} color={C.flame} />
+              <Text style={{ fontSize: 13, fontWeight: '600', color: C.flame }}>{fmtIn(group.expiresAt - now)} left</Text>
             </View>
           </View>
-          {pinned && (
-            <View style={s.pinned}>
-              <Text style={{ fontSize: 15, fontWeight: '600' }}>📍 Meeting at {pinned.name}</Text>
-              <Text style={[T.meta, { color: C.black }]}>{pinned.walk} min walk</Text>
-            </View>
-          )}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14 }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 16 }}>
             {group.members.map((u) => (
-              <Pressable key={u.id} onPress={() => dispatch({ type: 'PROFILE', user: u })} style={{ alignItems: 'center', gap: 2 }}>
-                <Avatar user={u} size={44} />
-                <Text style={[T.meta, { color: C.black, fontSize: 12 }]}>
-                  {u.id === 'me' ? 'You' : u.name} · 🔥{u.streak}
-                </Text>
+              <Pressable key={u.id} onPress={() => dispatch({ type: 'PROFILE', user: u })} style={{ alignItems: 'center', gap: 3 }}>
+                <Avatar user={u} size={46} />
+                <Text style={{ fontSize: 12, fontWeight: '600' }}>{u.id === 'me' ? 'You' : u.name}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                  <Ionicons name="flame" size={11} color={C.flame} />
+                  <Text style={{ fontSize: 11, fontWeight: '600', color: C.flame }}>{u.streak}</Text>
+                </View>
               </Pressable>
             ))}
           </ScrollView>
@@ -74,34 +70,45 @@ export default function Chat() {
           ref={list}
           data={data}
           keyExtractor={(m) => m.id}
-          contentContainerStyle={{ padding: 16, gap: 10 }}
+          contentContainerStyle={{ padding: 16, gap: 12 }}
           onContentSizeChange={() => list.current?.scrollToEnd({ animated: true })}
+          ListHeaderComponent={
+            pinned ? (
+              <View style={s.pinned}>
+                <Ionicons name="location" size={22} color={C.accent} />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 16, fontWeight: '600', color: C.accentDark }}>Meeting at {pinned.name}</Text>
+                  <Text style={{ fontSize: 12, color: C.accentDark }}>
+                    {pinned.walk} min walk{stat(pinned.id).last ? ` · usual ${adhan.label} spot` : ''}
+                  </Text>
+                </View>
+              </View>
+            ) : null
+          }
           renderItem={({ item: m }) => {
             if (m.system) {
-              return <Text style={[T.meta, { textAlign: 'center', marginVertical: 8 }]}>Group formed. Pick a spot and pray together.</Text>;
+              return <Text style={[T.meta, { textAlign: 'center', marginVertical: 4, color: C.g500 }]}>Pick a spot · pray together</Text>;
             }
             const mine = m.userId === 'me';
             const u = byId[m.userId];
             return (
-              <View style={{ alignItems: mine ? 'flex-end' : 'flex-start' }}>
-                {!mine && <Text style={[T.meta, { marginLeft: 12, marginBottom: 2 }]}>{u?.name}</Text>}
+              <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8, justifyContent: mine ? 'flex-end' : 'flex-start' }}>
+                {!mine && u && <Avatar user={u} size={30} />}
                 <View style={[s.bubble, mine ? s.mine : s.theirs]}>
-                  <Text style={[T.body, { color: mine ? C.white : C.black }]}>{m.text}</Text>
+                  {!mine && <Text style={{ fontSize: 12, fontWeight: '600', color: avatarColor(m.userId) }}>{u?.name}</Text>}
+                  <Text style={{ fontSize: 15, color: mine ? C.white : C.black }}>{m.text}</Text>
                 </View>
               </View>
             );
           }}
         />
 
-        <View style={{ gap: 10, paddingBottom: 8 }}>
+        <View style={s.composer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}>
-            <Pressable onPress={() => dispatch({ type: 'TAB', tab: 'food' })} style={[s.chip, { backgroundColor: C.black }]}>
-              <Text style={{ fontSize: 14, fontWeight: '600', color: C.white }}>🍽 Halal food nearby</Text>
-              <Text style={[T.meta, { fontSize: 12, color: C.g300 }]}>after prayer</Text>
-            </Pressable>
             {spots.map((p) => {
               const st = stat(p.id);
-              const hint = st.last ? `Last ${adhan.label} · ${p.walk} min` : st.count ? `Met here ${st.count}× · ${p.walk} min` : `${p.walk} min`;
+              const on = group.spot === p.id;
+              const hint = st.last ? `Last ${adhan.label}` : st.count ? `Met ${st.count}×` : `${p.walk} min`;
               return (
                 <Pressable
                   key={p.id}
@@ -109,22 +116,26 @@ export default function Chat() {
                     dispatch({ type: 'PIN_SPOT', spotId: p.id });
                     send(`Meet at ${p.name}? (${p.walk} min walk)`);
                   }}
-                  style={[s.chip, group.spot === p.id && s.chipOn]}
+                  style={[s.chip, on && s.chipOn]}
                 >
                   <Text style={{ fontSize: 14, fontWeight: '600' }}>📍 {p.name}</Text>
-                  <Text style={[T.meta, { fontSize: 12 }, st.last && { color: C.black }]}>{hint}</Text>
+                  <Text style={{ fontSize: 11, color: on || st.last ? C.accentDark : C.g700 }}>{hint}</Text>
                 </Pressable>
               );
             })}
+            <Pressable onPress={() => dispatch({ type: 'TAB', tab: 'food' })} style={s.chip}>
+              <Text style={{ fontSize: 14, fontWeight: '600' }}>🍽 Halal food</Text>
+              <Text style={{ fontSize: 11, color: C.g700 }}>after prayer</Text>
+            </Pressable>
           </ScrollView>
           <View style={{ paddingHorizontal: 16, gap: 10 }}>
             <View style={s.inputRow}>
               <TextInput value={text} onChangeText={setText} placeholder="Message" placeholderTextColor={C.g500} style={s.input} onSubmitEditing={() => send()} returnKeyType="send" />
               <Pressable onPress={() => send()} style={s.send}>
-                <Text style={{ color: C.white, fontWeight: '700' }}>↑</Text>
+                <Ionicons name="arrow-up" size={20} color={C.white} />
               </Pressable>
             </View>
-            <Button title="We prayed ✓" variant="accent" onPress={() => dispatch({ type: 'PRAYED' })} />
+            <Button title="We prayed" icon="checkmark-circle" variant="accent" onPress={() => dispatch({ type: 'PRAYED' })} />
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -133,14 +144,16 @@ export default function Chat() {
 }
 
 const s = StyleSheet.create({
-  header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, gap: 12, borderBottomWidth: 1, borderColor: C.g100 },
-  bubble: { maxWidth: '80%', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 18 },
-  mine: { backgroundColor: C.black, borderBottomRightRadius: 4 },
-  theirs: { backgroundColor: C.g100, borderBottomLeftRadius: 4 },
-  pinned: { backgroundColor: 'rgba(6,193,103,0.12)', borderRadius: 12, padding: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  chipOn: { borderColor: C.accent, borderWidth: 2 },
-  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: C.g50, borderWidth: 1, borderColor: C.g100 },
+  header: { paddingHorizontal: 20, paddingTop: 4, paddingBottom: 14, gap: 12, backgroundColor: C.canvas },
+  timer: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999, backgroundColor: C.white },
+  bubble: { maxWidth: '78%', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20, gap: 2 },
+  mine: { backgroundColor: C.brand, borderBottomRightRadius: 6 },
+  theirs: { backgroundColor: C.white, borderBottomLeftRadius: 6 },
+  pinned: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 16, borderRadius: 24, backgroundColor: C.accentSoft, marginBottom: 4 },
+  composer: { gap: 12, paddingTop: 8, paddingBottom: 12, backgroundColor: C.canvas },
+  chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, backgroundColor: C.white, gap: 1 },
+  chipOn: { backgroundColor: C.accentSoft },
   inputRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  input: { flex: 1, height: 44, borderRadius: 22, backgroundColor: C.g50, paddingHorizontal: 16, fontSize: 16 },
-  send: { width: 44, height: 44, borderRadius: 22, backgroundColor: C.black, alignItems: 'center', justifyContent: 'center' },
+  input: { flex: 1, height: 46, borderRadius: 23, backgroundColor: C.white, paddingHorizontal: 16, fontSize: 16, fontFamily: 'Geist_400Regular' },
+  send: { width: 46, height: 46, borderRadius: 23, backgroundColor: C.brand, alignItems: 'center', justifyContent: 'center' },
 });

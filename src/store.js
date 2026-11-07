@@ -52,7 +52,7 @@ export function reducer(s, a) {
       return { ...s, group: { ...s.group, messages: [...s.group.messages, msg(a.userId, a.text)] } };
     case 'PRAYED': {
       const from = s.me.streak;
-      const me = { ...s.me, streak: from + 1, prayedToday: { ...s.me.prayedToday, [s.adhan.key]: true } };
+      const me = { ...s.me, streak: from + 1, prayedToday: { ...s.me.prayedToday, [s.adhan.key]: true }, lastJamaah: new Date().toDateString() };
       const network = { ...s.network, prayers: s.network.prayers + 1 }; // live mode: server overwrites
       return { ...s, me, network, response: 'prayed', chatOpen: false, tab: 'home', streakSheet: { from, to: me.streak } };
     }
@@ -74,7 +74,7 @@ export function reducer(s, a) {
     case 'PROFILE':
       return { ...s, profile: a.user };
     case 'RESET':
-      return { ...initialState, onboarded: s.onboarded, me: { ...s.me, streak: ME.streak, prayedToday: { ...ME.prayedToday } } };
+      return { ...initialState, onboarded: s.onboarded, me: { ...s.me, streak: ME.streak, prayedToday: { ...ME.prayedToday }, lastJamaah: undefined } };
     default:
       return s;
   }

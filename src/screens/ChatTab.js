@@ -14,14 +14,14 @@ export default function ChatTab() {
   if (response === 'free') return chatOpen ? <Chat /> : <Matching />;
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: C.white }}>
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: C.canvas }}>
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 10 }}>
         <Ionicons name="chatbubbles-outline" size={56} color={C.g300} />
-        <Text style={T.h2}>{response === 'prayed' ? 'Jama\'ah complete' : 'No active jama\'ah'}</Text>
+        <Text style={T.h2}>{response === 'prayed' ? 'Jama\'ah complete' : 'No group yet'}</Text>
         <Text style={[T.body, { color: C.g700, textAlign: 'center' }]}>
           {response === 'prayed'
-            ? `You prayed ${adhan.label} with the group. That chat has closed.`
-            : 'When the adhan goes off and you say yes, your temporary group chat shows up here.'}
+            ? `${adhan.label} done. Chat closed.`
+            : 'Say yes at the next adhan to join a group.'}
         </Text>
       </View>
     </SafeAreaView>

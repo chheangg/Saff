@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
 import { Store, initialState, isDemoActive, reducer, startAdhan } from './src/store';
 import { loadSaved, save } from './src/persist';
+import { useAppFonts } from './src/fonts';
 import { connectLive, isLive, mirror, rejoin } from './src/live';
 import TabBar from './src/TabBar';
 import Onboarding from './src/screens/Onboarding';
@@ -29,6 +30,7 @@ if (native) Notifications.setNotificationHandler({
 const SCREENS = { home: Home, chat: ChatTab, food: Food, profile: Profile };
 
 export default function App() {
+  const fontsLoaded = useAppFonts();
   const [state, rawDispatch] = useReducer(reducer, initialState);
   // Every action goes to the reducer; the user's own actions are mirrored to the server in live mode.
   const dispatch = useMemo(() => (a) => { rawDispatch(a); mirror(a); }, []);
@@ -63,7 +65,7 @@ export default function App() {
     return () => sub.remove();
   }, []);
 
-  if (!deviceId) return null; // brief, while storage loads
+  if (!deviceId || !fontsLoaded) return null; // brief, while storage + fonts load
 
   return (
     <SafeAreaProvider>

@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Linking, Text, View } from 'react-native';
+import { Animated, Linking, Modal, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { C, T } from '../theme';
-import { Avatar, Button, PrayerDots, Sheet } from '../ui';
+import { Avatar, Button, Sheet, WeekRow } from '../ui';
 import { useStore } from '../store';
 import { nextPrayer } from '../prayer';
 import { campusOf } from '../data';
@@ -25,17 +27,32 @@ export function StreakSheet() {
     return () => clearTimeout(t);
   }, [info]);
 
+  const close = () => dispatch({ type: 'CLOSE_STREAK' });
   return (
-    <Sheet visible={!!info} onClose={() => dispatch({ type: 'CLOSE_STREAK' })}>
-      <View style={{ alignItems: 'center', gap: 4, paddingTop: 8 }}>
-        <Animated.Text style={{ fontSize: 88, transform: [{ scale: pop }] }}>🔥</Animated.Text>
-        <Text style={{ fontSize: 64, fontWeight: '800', letterSpacing: -2 }}>{n}</Text>
-        <Text style={T.h2}>day streak</Text>
-        <Text style={[T.meta, { marginTop: 4 }]}>Keep it going at {nextPrayer().label}, insha'Allah.</Text>
-      </View>
-      <PrayerDots done={state.me.prayedToday} />
-      <Button title="Done" onPress={() => dispatch({ type: 'CLOSE_STREAK' })} />
-    </Sheet>
+    <Modal visible={!!info} animationType="slide" onRequestClose={close}>
+      <SafeAreaView style={{ flex: 1, width: '100%', maxWidth: 480, alignSelf: 'center', backgroundColor: C.canvas }}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 20, paddingHorizontal: 24 }}>
+          <View style={{ width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(249,115,22,0.12)', alignItems: 'center', justifyContent: 'center' }}>
+            <Animated.View style={{ transform: [{ scale: pop }] }}>
+              <Ionicons name="flame" size={110} color={C.flame} />
+            </Animated.View>
+          </View>
+          <View style={{ alignItems: 'center' }}>
+            <Text style={{ fontSize: 96, fontWeight: '700', letterSpacing: -4, color: C.flame, lineHeight: 104 }}>{n}</Text>
+            <Text style={{ fontSize: 24, fontWeight: '600', letterSpacing: -0.8 }}>day streak</Text>
+          </View>
+          <Text style={[T.body, { color: C.g700, textAlign: 'center', maxWidth: 300, lineHeight: 22 }]}>
+            Prayed {state.adhan?.label ?? ''} with {Math.max(0, state.group.members.length - 1)} {state.me.gender}s
+          </Text>
+          <View style={{ alignSelf: 'stretch', backgroundColor: C.white, borderRadius: 28, padding: 16 }}>
+            <WeekRow streak={n} prayedToday={n === info?.to} />
+          </View>
+        </View>
+        <View style={{ paddingHorizontal: 20, paddingBottom: 24 }}>
+          <Button title="Continue" onPress={close} />
+        </View>
+      </SafeAreaView>
+    </Modal>
   );
 }
 
