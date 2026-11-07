@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Image, Modal, Text, View } from 'react-native';
+import { Animated, Image, Modal, View } from 'react-native';
+import { Text } from '../Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { C, T } from '../theme';

@@ -1,6 +1,7 @@
 // Prayer map (iOS/Android): campus spots as pins, the pinned jama'ah spot in emerald.
 // Tap a pin to choose it. Web uses MapCard.web.js.
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from './Text';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { C, DARK } from './theme';

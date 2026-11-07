@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Linking, Modal, Text, View } from 'react-native';
+import { Animated, Linking, Modal, View } from 'react-native';
+import { Text } from '../Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';

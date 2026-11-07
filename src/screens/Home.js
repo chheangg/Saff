@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Image, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Animated, Image, Platform, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Text } from '../Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -91,12 +92,15 @@ export default function Home() {
         </Text>
 
         {Platform.OS !== 'web' && (
-          <View style={[s.card, { flexDirection: 'row', alignItems: 'center' }]}>
-            <Ionicons name="notifications-outline" size={22} color={C.black} />
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 16, fontWeight: '600' }}>Adhan alerts</Text>
+          <View style={[s.card, { flexDirection: 'row', alignItems: 'center', paddingVertical: 14 }]}>
+            <View style={[s.flameBadge, { width: 40, height: 40, backgroundColor: C.brandSoft }]}>
+              <Ionicons name={notify ? 'notifications' : 'notifications-off-outline'} size={20} color={C.brand} />
             </View>
-            <Switch value={notify} onValueChange={toggleNotify} trackColor={{ true: C.accent }} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 16, fontWeight: '600', color: C.black }}>Adhan alerts</Text>
+              <Text style={T.meta}>{notify ? 'On for every prayer' : 'Off'}</Text>
+            </View>
+            <Switch value={notify} onValueChange={toggleNotify} trackColor={{ true: C.accent, false: C.g300 }} thumbColor="#FFFFFF" ios_backgroundColor={C.g300} />
           </View>
         )}
 

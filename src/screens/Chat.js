@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Text } from '../Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { C, T, avatarColor } from '../theme';
@@ -153,6 +154,6 @@ const s = StyleSheet.create({
   chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, backgroundColor: C.white, gap: 1 },
   chipOn: { backgroundColor: C.accentSoft },
   inputRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  input: { flex: 1, height: 46, borderRadius: 23, backgroundColor: C.white, paddingHorizontal: 16, fontSize: 16, fontFamily: 'Geist_400Regular' },
+  input: { flex: 1, height: 46, borderRadius: 23, backgroundColor: C.white, paddingHorizontal: 16, fontSize: 16, color: C.black, fontFamily: 'Geist_400Regular' },
   send: { width: 46, height: 46, borderRadius: 23, backgroundColor: C.brand, alignItems: 'center', justifyContent: 'center' },
 });
