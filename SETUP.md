@@ -125,6 +125,10 @@ claude mcp add pencil -- /Applications/Pen.app/Contents/Resources/app.asar.unpac
 - [ ] Add dark variants for the Popup, Chat, and Streak screens: copy the frame and set `theme: {mode: "dark"}`.
 - [ ] Record the 60s video. Use `EXPO_PUBLIC_THEME=dark` or `light` to pin a theme.
 
+**In progress (Evan):**
+- [ ] **Prayer map:** a map card in the group chat shows where the jama'ah is. It plots the campus spots, highlights the pinned spot in emerald, lets you tap a pin to choose the spot, and has a Directions button that opens Apple or Google Maps. iOS and Android use `react-native-maps`; web uses an OpenStreetMap embed. Spot coordinates in `src/data.js` are approximate, so walk them and fix them.
+- [ ] Check the app against `saff.pen` in Pencil: load the live app in a canvas browser next to the design frames.
+
 **Tokens** (`src/theme.js` mirrors the .pen variables):
 
 | Token | Light | Dark | Use |
