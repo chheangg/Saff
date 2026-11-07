@@ -16,7 +16,7 @@
 
 **Pipeline (Claude runs it):** `node video/tools/analyze.mjs` sorts the inbox by recording time, classifies each file (camera / screen / memo), and syncs memo↔camera and screen↔walk by sound. It writes `video/raw/plan.json`. Then Claude builds the kino project from the plan: imports, layout, captions (`add_captions speech`, fixing "SAF" → "Saff"), title/end cards, music ducked under the voice, and renders to `video/exports/`.
 
-**Music:** many in the MSA avoid instrumental music, so the **default is no music**: voice, natural sound, and a soft whoosh on the cuts. If the team wants a bed anyway, kino's licensed library (Kevin MacLeod, CC BY 4.0, credit in the end card) fits "Angel Share" (uplifting, calm, 85 bpm) or "Eternity" (lofi, calm). A vocals-only nasheed dropped into `video/music/` also works. Say which.
+**Music (chosen):** "Angel Share" by Kevin MacLeod (incompetech.com), CC BY 4.0, ducked under the voice. The credit is on the end card. `video/music/angel-share.mp3` is downloaded and sha256-checked; it's gitignored, so the kino project `saff-60` already holds a copy.
 
 **Brand assets:** `assets/brand/` has `logo-on-dark.png`, `logo-on-light.png`, `title-card-16x9.png`, and `end-card-16x9.png` (from `design/saff.pen`).
 
