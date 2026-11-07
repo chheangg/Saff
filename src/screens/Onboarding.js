@@ -5,20 +5,12 @@ import { C, CARD, T } from '../theme';
 import { Button } from '../ui';
 import { useStore } from '../store';
 import { CAMPUSES, ME, campusOf } from '../data';
+import { emailOk as emailMatches, instagramUrl, linkedinUrl } from '../profile';
 
 const MOON = require('../../assets/mascot/moon-wave.png');
 
 // Real users start blank with a 0-day streak; "Use demo profile" fills in Evan (6-day streak) for the video.
 const BLANK = { name: '', email: '', campus: 'ucsd', gender: 'brother', major: '', year: '', linkedin: '', instagram: '', streak: 0, prayedToday: {} };
-
-// Accept "@handle", "linkedin.com/in/x" or a full URL.
-const toUrl = (v, base) => {
-  const t = v.trim();
-  if (!t) return '';
-  if (/^https?:\/\//i.test(t)) return t;
-  if (t.includes('.')) return `https://${t}`;
-  return `${base}${t.replace(/^@/, '')}`;
-};
 
 export default function Onboarding() {
   const { dispatch } = useStore();
@@ -27,7 +19,7 @@ export default function Onboarding() {
   const set = (k) => (v) => setP({ ...p, [k]: v });
   const campus = campusOf(p.campus);
   // Accept the campus domain and its subdomains (e.g. student.sdccd.edu).
-  const emailOk = new RegExp(`[@.]${campus.domain.replace('.', '\\.')}$`, 'i').test(p.email.trim());
+  const emailOk = emailMatches(p.email, campus);
   const valid = p.name.trim() && emailOk;
 
   const finish = (profile) =>
@@ -37,8 +29,8 @@ export default function Onboarding() {
         ...profile,
         name: profile.name.trim(),
         email: profile.email.trim(),
-        linkedin: toUrl(profile.linkedin, 'https://www.linkedin.com/in/'),
-        instagram: toUrl(profile.instagram, 'https://www.instagram.com/'),
+        linkedin: linkedinUrl(profile.linkedin),
+        instagram: instagramUrl(profile.instagram),
       },
     });
 

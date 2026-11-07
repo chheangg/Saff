@@ -50,7 +50,7 @@ export function Button({ title, onPress, variant = 'primary', disabled, style, i
 }
 
 // Today's five prayers as a path of nodes: done (emerald check), current (indigo ring), upcoming (muted lock).
-export function PrayerDots({ done, current, showTimes = true }) {
+export function PrayerDots({ done, current, showTimes = true, surface }) {
   const t = Object.fromEntries(times().map((p) => [p.key, p.time]));
   const now = new Date();
   return (
@@ -61,7 +61,7 @@ export function PrayerDots({ done, current, showTimes = true }) {
         const missed = !isDone && !isNow && t[p] <= now;
         return (
           <View key={p} style={{ alignItems: 'center', gap: 6 }}>
-            <View style={[s.node, isDone && s.nodeDone, isNow && s.nodeNow]}>
+            <View style={[s.node, surface && { backgroundColor: surface }, isDone && s.nodeDone, isNow && s.nodeNow]}>
               <Ionicons name={isDone ? 'checkmark' : isNow ? 'moon' : missed ? 'remove' : 'lock-closed'} size={isDone ? 24 : 20} color={isDone || isNow ? C.onColor : C.g300} />
             </View>
             <Text style={{ fontSize: 13, fontWeight: '600', color: isDone || isNow ? C.black : C.g700 }}>{LABEL[p]}</Text>

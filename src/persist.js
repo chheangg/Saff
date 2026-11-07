@@ -14,6 +14,10 @@ export async function loadSaved() {
   return fresh;
 }
 
+export async function clearSaved() {
+  await AsyncStorage.removeItem(KEY).catch(() => {});
+}
+
 export function save(data) {
   AsyncStorage.setItem(KEY, JSON.stringify(data)).catch(() => {});
 }

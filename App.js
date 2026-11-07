@@ -55,7 +55,7 @@ export default function App() {
   useEffect(() => {
     if (deviceId && !isDemoActive()) save({ deviceId, onboarded: state.onboarded, me: state.me });
   }, [deviceId, state.onboarded, state.me]);
-  useEffect(() => { if (state.onboarded) rejoin(state.me); }, [state.onboarded, state.me.gender]);
+  useEffect(() => { if (state.onboarded) rejoin(state.me); }, [state.onboarded, state.me.gender, state.me.campus, state.me.name]);
   // Adhan alerts on by default: schedule today's prayers + register for server push, then tell the server.
   useEffect(() => {
     if (!native || !state.onboarded || state.me.alerts === false) return;
