@@ -40,6 +40,8 @@ A streak counts consecutive days on which you prayed at least one prayer in cong
 
 ## Run it
 
+Teammates: see [SETUP.md](SETUP.md) to get it on your phone + who owns which files.
+
 ```bash
 npm install
 npx expo start          # scan the QR code with Expo Go (iOS camera / Android Expo Go app)
@@ -47,6 +49,16 @@ npx expo start --tunnel # if your phone is on a different network
 ```
 
 **Demo mode:** long-press the **Saff** wordmark on Home and tap **Play demo**. After 3 seconds, a real notification fires (lock the phone to catch the banner), the adhan screen opens, 4 seeded users join, and the chat plays a script. **Reset** replays it. Seed content lives in `src/data.js`.
+
+**Live mode (real groups across phones):**
+
+```bash
+cd server && npm install && npm start      # :4000, fires the adhan at real UCSD prayer times
+echo "EXPO_PUBLIC_SERVER_URL=http://<your-laptop-ip>:4000" > .env   # in the repo root, then restart expo
+curl -X POST "http://localhost:4000/adhan?key=saff" -H 'content-type: application/json' -d '{"prayer":"asr"}'   # trigger an adhan now
+```
+
+The server is in-memory: Socket.IO events `join`, `free`, `message`, `prayed` → `adhan`, `group`, `me`. Brothers and sisters get separate groups, and streaks go up once per Pacific day. Set `ADMIN_KEY` in production. Demo mode still works while live mode is on.
 
 ## Tech stack: Expo app + 60-second video
 
@@ -68,6 +80,8 @@ src/data.js            demo profile, bots, spots, chat script
 src/prayer.js          prayer times for UCSD
 src/ui.js              Avatar, Button, Sheet, PrayerDots, PopIn
 src/screens/           Onboarding, Home, Takeover, Matching, Chat, Sheets
+src/live.js            Socket.IO client (live mode)
+server/index.js        realtime server + adhan scheduler
 ```
 
 ## Task split

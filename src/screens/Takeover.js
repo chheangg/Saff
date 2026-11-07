@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { C } from '../theme';
 import { Avatar, Button, PopIn } from '../ui';
 import { useStore } from '../store';
+import { campusOf } from '../data';
 
 // iOS-notification-style popup that drops in over whatever tab you're on.
 export default function Takeover() {
@@ -39,7 +40,7 @@ export default function Takeover() {
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Text style={{ color: C.accent, fontSize: 13, fontWeight: '700', letterSpacing: 1.5 }}>SAFF · NOW</Text>
-            <Text style={{ color: C.g500, fontSize: 13 }}>{adhan.timeLabel}</Text>
+            <Text style={{ color: C.g500, fontSize: 13 }}>{adhan.timeLabel} · {campusOf(me.campus).name}</Text>
           </View>
 
           <View style={{ gap: 4 }}>

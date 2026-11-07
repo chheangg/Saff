@@ -3,13 +3,18 @@ import { FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleS
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { C, T } from '../theme';
 import { Avatar, Button } from '../ui';
-import { SPOTS } from '../data';
+import { campusOf } from '../data';
 import { botReply, playChat, useStore } from '../store';
 import { fmtIn } from '../prayer';
 
 export default function Chat() {
   const { state, dispatch } = useStore();
   const { me, adhan, group } = state;
+  const campusSpots = campusOf(me.campus).spots;
+  const stat = (id) => group.spotStats?.[id] ?? {};
+  // Spots your group has used most come first; the one used last time for this prayer leads.
+  const spots = [...campusSpots].sort((a, b) => (stat(b.id).last ? 1e6 : 0) + (stat(b.id).count ?? 0) - ((stat(a.id).last ? 1e6 : 0) + (stat(a.id).count ?? 0)));
+  const pinned = campusSpots.find((p) => p.id === group.spot);
   const [text, setText] = useState('');
   const [now, setNow] = useState(Date.now());
   const list = useRef(null);
@@ -47,6 +52,12 @@ export default function Chat() {
               </Text>
             </View>
           </View>
+          {pinned && (
+            <View style={s.pinned}>
+              <Text style={{ fontSize: 15, fontWeight: '600' }}>📍 Meeting at {pinned.name}</Text>
+              <Text style={[T.meta, { color: C.black }]}>{pinned.walk} min walk</Text>
+            </View>
+          )}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14 }}>
             {group.members.map((u) => (
               <Pressable key={u.id} onPress={() => dispatch({ type: 'PROFILE', user: u })} style={{ alignItems: 'center', gap: 2 }}>
@@ -88,12 +99,23 @@ export default function Chat() {
               <Text style={{ fontSize: 14, fontWeight: '600', color: C.white }}>🍽 Halal food nearby</Text>
               <Text style={[T.meta, { fontSize: 12, color: C.g300 }]}>after prayer</Text>
             </Pressable>
-            {SPOTS.map((p) => (
-              <Pressable key={p.id} onPress={() => send(`Meet at ${p.name}? (${p.walk} min walk)`)} style={s.chip}>
-                <Text style={{ fontSize: 14, fontWeight: '600' }}>📍 {p.name}</Text>
-                <Text style={[T.meta, { fontSize: 12 }]}>{p.walk} min</Text>
-              </Pressable>
-            ))}
+            {spots.map((p) => {
+              const st = stat(p.id);
+              const hint = st.last ? `Last ${adhan.label} · ${p.walk} min` : st.count ? `Met here ${st.count}× · ${p.walk} min` : `${p.walk} min`;
+              return (
+                <Pressable
+                  key={p.id}
+                  onPress={() => {
+                    dispatch({ type: 'PIN_SPOT', spotId: p.id });
+                    send(`Meet at ${p.name}? (${p.walk} min walk)`);
+                  }}
+                  style={[s.chip, group.spot === p.id && s.chipOn]}
+                >
+                  <Text style={{ fontSize: 14, fontWeight: '600' }}>📍 {p.name}</Text>
+                  <Text style={[T.meta, { fontSize: 12 }, st.last && { color: C.black }]}>{hint}</Text>
+                </Pressable>
+              );
+            })}
           </ScrollView>
           <View style={{ paddingHorizontal: 16, gap: 10 }}>
             <View style={s.inputRow}>
@@ -115,6 +137,8 @@ const s = StyleSheet.create({
   bubble: { maxWidth: '80%', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 18 },
   mine: { backgroundColor: C.black, borderBottomRightRadius: 4 },
   theirs: { backgroundColor: C.g100, borderBottomLeftRadius: 4 },
+  pinned: { backgroundColor: 'rgba(6,193,103,0.12)', borderRadius: 12, padding: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  chipOn: { borderColor: C.accent, borderWidth: 2 },
   chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: C.g50, borderWidth: 1, borderColor: C.g100 },
   inputRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   input: { flex: 1, height: 44, borderRadius: 22, backgroundColor: C.g50, paddingHorizontal: 16, fontSize: 16 },
