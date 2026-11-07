@@ -16,37 +16,38 @@ export const ME = {
 
 // Manara network campuses. Each has its own spots and email domain.
 // Seed spots for non-UCSD campuses are placeholders; swap in real ones.
+// lat/lng are approximate (for the prayer map). Walk them and correct.
 export const CAMPUSES = [
   {
     id: 'ucsd', name: 'UC San Diego', short: 'UCSD', domain: 'ucsd.edu',
     spots: [
-      { id: 'pc', name: 'Price Center', walk: 5 },
-      { id: 'geisel', name: 'Geisel, 2nd floor', walk: 7 },
-      { id: 'libwalk', name: 'Library Walk lawn', walk: 4 },
-      { id: 'osc', name: 'Old Student Center', walk: 8 },
-      { id: 'rimac', name: 'RIMAC field', walk: 12 },
+      { id: 'pc', name: 'Price Center', walk: 5, lat: 32.8797, lng: -117.2362 },
+      { id: 'geisel', name: 'Geisel, 2nd floor', walk: 7, lat: 32.8812, lng: -117.2376 },
+      { id: 'libwalk', name: 'Library Walk lawn', walk: 4, lat: 32.8791, lng: -117.2371 },
+      { id: 'osc', name: 'Old Student Center', walk: 8, lat: 32.8778, lng: -117.2408 },
+      { id: 'rimac', name: 'RIMAC field', walk: 12, lat: 32.8852, lng: -117.2400 },
     ],
   },
   {
     id: 'sdsu', name: 'San Diego State', short: 'SDSU', domain: 'sdsu.edu',
     spots: [
-      { id: 'union', name: 'Aztec Student Union', walk: 5 },
-      { id: 'love', name: 'Love Library', walk: 6 },
-      { id: 'quad', name: 'Main Quad', walk: 4 },
+      { id: 'union', name: 'Aztec Student Union', walk: 5, lat: 32.7757, lng: -117.0717 },
+      { id: 'love', name: 'Love Library', walk: 6, lat: 32.7752, lng: -117.0710 },
+      { id: 'quad', name: 'Main Quad', walk: 4, lat: 32.7762, lng: -117.0705 },
     ],
   },
   {
     id: 'mesa', name: 'San Diego Mesa College', short: 'Mesa', domain: 'sdccd.edu',
     spots: [
-      { id: 'lrc', name: 'Learning Resource Center', walk: 4 },
-      { id: 'ssc', name: 'Student Services Center', walk: 5 },
+      { id: 'lrc', name: 'Learning Resource Center', walk: 4, lat: 32.8041, lng: -117.1695 },
+      { id: 'ssc', name: 'Student Services Center', walk: 5, lat: 32.8033, lng: -117.1705 },
     ],
   },
   {
     id: 'usd', name: 'University of San Diego', short: 'USD', domain: 'sandiego.edu',
     spots: [
-      { id: 'copley', name: 'Copley Library', walk: 6 },
-      { id: 'slp', name: 'Student Life Pavilion', walk: 4 },
+      { id: 'copley', name: 'Copley Library', walk: 6, lat: 32.7717, lng: -117.1878 },
+      { id: 'slp', name: 'Student Life Pavilion', walk: 4, lat: 32.7723, lng: -117.1886 },
     ],
   },
 ];

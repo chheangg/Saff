@@ -7,6 +7,7 @@ import { Avatar, Button } from '../ui';
 import { campusOf } from '../data';
 import { botReply, playChat, useStore } from '../store';
 import { fmtIn } from '../prayer';
+import MapCard from '../MapCard';
 
 export default function Chat() {
   const { state, dispatch } = useStore();
@@ -39,6 +40,12 @@ export default function Chat() {
     }
   }
 
+  function pickSpot(p) {
+    if (group.spot === p.id) return;
+    dispatch({ type: 'PIN_SPOT', spotId: p.id });
+    send(`Meet at ${p.name}? (${p.walk} min walk)`);
+  }
+
   const data = [{ id: 'sys', system: true }, ...group.messages];
 
   return (
@@ -69,17 +76,12 @@ export default function Chat() {
           contentContainerStyle={{ padding: 16, gap: 12 }}
           onContentSizeChange={() => list.current?.scrollToEnd({ animated: true })}
           ListHeaderComponent={
-            pinned ? (
-              <View style={s.pinned}>
-                <Ionicons name="location" size={22} color={C.accent} />
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '600', color: C.accentDark }}>Meeting at {pinned.name}</Text>
-                  <Text style={{ fontSize: 12, color: C.accentDark }}>
-                    {pinned.walk} min walk{stat(pinned.id).last ? ` · usual ${adhan.label} spot` : ''}
-                  </Text>
-                </View>
-              </View>
-            ) : null
+            <MapCard
+              spots={campusSpots}
+              pinnedId={group.spot}
+              hint={pinned ? `${pinned.walk} min walk${stat(pinned.id).last ? ` · usual ${adhan.label} spot` : ''}` : ''}
+              onPick={pickSpot}
+            />
           }
           renderItem={({ item: m }) => {
             if (m.system) {
@@ -108,10 +110,7 @@ export default function Chat() {
               return (
                 <Pressable
                   key={p.id}
-                  onPress={() => {
-                    dispatch({ type: 'PIN_SPOT', spotId: p.id });
-                    send(`Meet at ${p.name}? (${p.walk} min walk)`);
-                  }}
+                  onPress={() => pickSpot(p)}
                   style={[s.chip, on && s.chipOn]}
                 >
                   <Text style={{ fontSize: 14, fontWeight: '600' }}>📍 {p.name}</Text>

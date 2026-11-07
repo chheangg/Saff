@@ -4,7 +4,7 @@ import { Text } from 'react-native';
 import { useFonts, Geist_400Regular, Geist_500Medium, Geist_600SemiBold, Geist_700Bold } from '@expo-google-fonts/geist';
 import { GeistMono_500Medium } from '@expo-google-fonts/geist-mono';
 import { StyleSheet } from 'react-native';
-import { F } from './theme';
+import { C, F } from './theme';
 
 let patched = false;
 function patchText() {
@@ -13,11 +13,15 @@ function patchText() {
   const render = Text.render;
   Text.render = function (props, ref) {
     const flat = StyleSheet.flatten(props.style) || {};
+    const add = {};
     if (!flat.fontFamily) {
       const w = String(flat.fontWeight ?? '400');
-      const family = F[w] ?? (Number(w) >= 600 ? F[600] : F[400]);
-      props = { ...props, style: [props.style, { fontFamily: family, fontWeight: undefined }] };
+      add.fontFamily = F[w] ?? (Number(w) >= 600 ? F[600] : F[400]);
+      add.fontWeight = undefined;
     }
+    // Default text color follows the theme (RN defaults to black, invisible in dark mode).
+    if (!flat.color) add.color = C.black;
+    if (Object.keys(add).length) props = { ...props, style: [{ color: C.black }, props.style, add] };
     return render.call(this, props, ref);
   };
 }

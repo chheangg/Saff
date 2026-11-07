@@ -71,4 +71,4 @@ export const FLAME = ['#FDBA74', '#F97316', '#EA580C'];
 // Clean borderless card: white on canvas with a whisper of shadow.
 export const CARD = { backgroundColor: C.white, borderRadius: 28, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 12, shadowOffset: { width: 0, height: 2 }, elevation: 1 };
 const AVATAR = ['#F97316', '#6366F1', '#A855F7', '#EF4444', '#0EA5E9', '#10B981', '#EC4899'];
-export const avatarColor = (id = '') => (id === 'me' ? C.black : AVATAR[[...id].reduce((a, c) => a + c.charCodeAt(0), 0) % AVATAR.length]);
+export const avatarColor = (id = '') => (id === 'me' ? (DARK ? '#3F3F46' : '#0B0B0F') : AVATAR[[...id].reduce((a, c) => a + c.charCodeAt(0), 0) % AVATAR.length]);
