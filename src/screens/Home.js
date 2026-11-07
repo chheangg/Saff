@@ -6,10 +6,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { C, CARD, FLAME, HERO, T } from '../theme';
 import { Avatar, Button, PrayerDots, Sheet } from '../ui';
-import { playDemo, stopDemo, useStore } from '../store';
+import { playDemo, startAdhan, stopDemo, useStore } from '../store';
 import { disableAlerts } from '../alerts';
 import { currentPrayer, fmtIn, fmtTime, nextPrayer } from '../prayer';
-import { campusOf } from '../data';
+import { BOTS, DEMO_SPOT_STATS, campusOf } from '../data';
 import { useWalkTimes } from '../location';
 
 const MOON = require('../../assets/mascot/moon-sleepy.png');
@@ -118,8 +118,10 @@ export default function Home() {
   );
 }
 
-// "Live now": an ongoing jama'ah for your own campus + gender group (the server never mixes).
-// Shows while the adhan's group is open; Join answers yes, or jumps to the chat if you're in.
+// "Live now": always on Home. Three states:
+// - a jama'ah is open (demo or real): live, with your own campus+gender group (the server never mixes)
+// - nothing running yet: the current prayer's jama'ah at your usual spot; Join starts it
+// - you already prayed: a done state
 function LiveCard({ now }) {
   const { state, dispatch } = useStore();
   const { adhan, group, response, me } = state;
@@ -131,29 +133,44 @@ function LiveCard({ now }) {
   }, []);
 
   const { spots } = useWalkTimes(campusOf(me.campus).spots);
-  const open = adhan && now - adhan.at < 30 * 60 * 1000 && response !== 'prayed';
-  const others = group.members.filter((u) => u.id !== 'me');
-  if (!open || (!others.length && response !== 'free')) return null;
+  const active = adhan && now - adhan.at < 30 * 60 * 1000;
+  const done = active && response === 'prayed';
+  const inGroup = active && response === 'free';
 
-  const spot = spots.find((p) => p.id === group.spot);
-  const mins = Math.max(0, Math.round((now - adhan.at) / 60000));
-  const inGroup = response === 'free';
+  // What the card shows: the open group, or the current prayer at the usual spot.
+  const cur = currentPrayer(now);
+  const prayer = active ? adhan : { key: cur.key, label: cur.label, timeLabel: fmtTime(cur.time) };
+  const others = active ? group.members.filter((u) => u.id !== 'me') : BOTS[me.gender];
+  const usual = Object.entries(DEMO_SPOT_STATS).find(([, v]) => v.last)?.[0];
+  const spot = spots.find((p) => p.id === (active ? group.spot : usual)) ?? (active ? null : spots[0]);
+  const since = active ? adhan.at : cur.time.getTime();
+  const mins = Math.min(29, Math.max(0, Math.round((now - since) / 60000)));
   const n = others.length;
 
+  function join() {
+    if (inGroup) return dispatch({ type: 'TAB', tab: 'chat' });
+    if (!active) startAdhan(dispatch, prayer, me.gender); // start this prayer's jama'ah now
+    dispatch({ type: 'RESPOND', answer: 'free' });
+  }
+
   return (
-    <View style={s.live}>
+    <View style={[s.live, done && { borderColor: C.line, shadowOpacity: 0.04 }]}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <View style={s.livePill}>
-          <View style={{ width: 14, height: 14, alignItems: 'center', justifyContent: 'center' }}>
-            <Animated.View style={[s.pulse, { opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.5, 0] }), transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1.8] }) }] }]} />
-            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: C.accent }} />
-          </View>
-          <Text style={[T.kicker, { color: C.accentDark }]}>Live now</Text>
+          {done ? (
+            <Ionicons name="checkmark-circle" size={14} color={C.accent} />
+          ) : (
+            <View style={{ width: 14, height: 14, alignItems: 'center', justifyContent: 'center' }}>
+              <Animated.View style={[s.pulse, { opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.5, 0] }), transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1.8] }) }] }]} />
+              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: C.accent }} />
+            </View>
+          )}
+          <Text style={[T.kicker, { color: C.accentDark }]}>{done ? 'Prayed' : 'Live now'}</Text>
         </View>
-        <Text style={T.meta}>{mins ? `started ${mins} min ago` : 'just started'}</Text>
+        <Text style={T.meta}>{done ? 'see you next prayer' : mins ? `started ${mins} min ago` : 'just started'}</Text>
       </View>
       <View style={{ gap: 2 }}>
-        <Text style={{ fontSize: 24, fontWeight: '700', letterSpacing: -0.8 }}>{adhan.label} jama'ah</Text>
+        <Text style={{ fontSize: 24, fontWeight: '700', letterSpacing: -0.8 }}>{prayer.label} jama'ah</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
           <Ionicons name="location-outline" size={14} color={C.g700} />
           <Text style={T.meta}>{spot ? `${spot.name} · ${spot.walk} min walk` : 'Picking a spot…'}</Text>
@@ -168,15 +185,14 @@ function LiveCard({ now }) {
               </View>
             ))}
           </View>
-          <Text style={{ fontSize: 14, fontWeight: '600' }}>{n ? `${n} ${me.gender}${n > 1 ? 's' : ''}` : 'Just you so far'}</Text>
+          <Text style={{ fontSize: 14, fontWeight: '600' }}>{n ? `${n} ${me.gender}${n > 1 ? 's' : ''}` : 'Be the first'}</Text>
         </View>
-        <Pressable
-          style={s.join}
-          onPress={() => (inGroup ? dispatch({ type: 'TAB', tab: 'chat' }) : dispatch({ type: 'RESPOND', answer: 'free' }))}
-        >
-          <Text style={{ fontSize: 15, fontWeight: '600', color: C.onColor }}>{inGroup ? 'Open' : 'Join'}</Text>
-          <Ionicons name="arrow-forward" size={16} color={C.onColor} />
-        </Pressable>
+        {!done && (
+          <Pressable style={s.join} onPress={join}>
+            <Text style={{ fontSize: 15, fontWeight: '600', color: C.onColor }}>{inGroup ? 'Open' : 'Join'}</Text>
+            <Ionicons name="arrow-forward" size={16} color={C.onColor} />
+          </Pressable>
+        )}
       </View>
     </View>
   );
