@@ -35,7 +35,7 @@ export default function App() {
   const fontsLoaded = useAppFonts();
   const [state, rawDispatch] = useReducer(reducer, initialState);
   // Every action goes to the reducer; the user's own actions are mirrored to the server in live mode.
-  const dispatch = useMemo(() => (a) => { rawDispatch(a); mirror(a); }, []);
+  const dispatch = useMemo(() => (a) => { rawDispatch(a); mirror(a, meRef.current); }, []);
   const store = useMemo(() => ({ state, dispatch }), [state]);
   const meRef = useRef(state.me);
   meRef.current = state.me;
@@ -51,7 +51,7 @@ export default function App() {
       setDeviceId(saved.deviceId);
     });
   }, []);
-  useEffect(() => (deviceId ? connectLive(rawDispatch, () => (onboardedRef.current ? meRef.current : null), deviceId) : undefined), [deviceId]);
+  useEffect(() => (deviceId ? connectLive(rawDispatch, () => (onboardedRef.current && !meRef.current.demo ? meRef.current : null), deviceId) : undefined), [deviceId]);
   useEffect(() => {
     if (deviceId && !isDemoActive()) save({ deviceId, onboarded: state.onboarded, me: state.me, history: state.history });
   }, [deviceId, state.onboarded, state.me, state.history]);

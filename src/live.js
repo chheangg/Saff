@@ -23,9 +23,11 @@ export function connectLive(dispatch, getMe, id) {
     const me = getMe();
     if (me) live.emit('join', { ...me, id: deviceId, pushToken: getPushToken() });
   };
-  const onAdhan = (prayer) => !isDemoActive() && dispatch({ type: 'ADHAN', prayer });
+  // The demo profile (and anyone not onboarded yet) stays offline: ignore server events.
+  const offline = () => isDemoActive() || !getMe();
+  const onAdhan = (prayer) => !offline() && dispatch({ type: 'ADHAN', prayer });
   const onGroup = (g) =>
-    !isDemoActive() &&
+    !offline() &&
     dispatch({
       type: 'GROUP',
       group: {
@@ -34,8 +36,8 @@ export function connectLive(dispatch, getMe, id) {
         messages: g.messages.map((m) => ({ ...m, userId: local(m.userId) })),
       },
     });
-  const onNetwork = (n) => !isDemoActive() && dispatch({ type: 'NETWORK', network: n });
-  const onMe = (u) => dispatch({ type: 'ME', me: { streak: u.streak, prayedToday: u.prayedToday } });
+  const onNetwork = (n) => !offline() && dispatch({ type: 'NETWORK', network: n });
+  const onMe = (u) => !offline() && dispatch({ type: 'ME', me: { streak: u.streak, prayedToday: u.prayedToday } });
 
   live.on('connect', join);
   live.on('adhan', onAdhan);
@@ -53,11 +55,11 @@ export function connectLive(dispatch, getMe, id) {
   };
 }
 
-export const rejoin = (me) => live?.connected && live.emit('join', { ...me, id: deviceId, pushToken: getPushToken() });
+export const rejoin = (me) => !me.demo && live?.connected && live.emit('join', { ...me, id: deviceId, pushToken: getPushToken() });
 
 // Mirror the user's own actions to the server (bots/demo never reach here).
-export function mirror(action) {
-  if (!live || isDemoActive()) return;
+export function mirror(action, me) {
+  if (!live || isDemoActive() || me?.demo) return;
   if (action.type === 'RESPOND' && action.answer === 'free') live.emit('free');
   if (action.type === 'MESSAGE' && action.userId === 'me') live.emit('message', action.text);
   if (action.type === 'PRAYED') live.emit('prayed');

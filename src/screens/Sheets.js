@@ -43,7 +43,7 @@ export function StreakSheet() {
             <Text style={{ fontSize: 24, fontWeight: '600', letterSpacing: -0.8 }}>day streak</Text>
           </View>
           <Text style={[T.body, { color: C.g700, textAlign: 'center', maxWidth: 300, lineHeight: 22 }]}>
-            Prayed {state.adhan?.label ?? ''} with {Math.max(0, state.group.members.length - 1)} {state.me.gender}s
+            {(() => { const k = Math.max(0, state.group.members.length - 1); return k ? `Prayed ${state.adhan?.label ?? ''} with ${k} ${state.me.gender}${k === 1 ? '' : 's'}` : `Prayed ${state.adhan?.label ?? ''}`; })()}
           </Text>
           <View style={{ alignSelf: 'stretch', backgroundColor: C.white, borderRadius: 28, padding: 16 }}>
             <WeekRow streak={n} prayedToday={n === info?.to} />

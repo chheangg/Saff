@@ -81,7 +81,7 @@ export default function Onboarding() {
           {!!p.email.trim() && !emailOk && <Text style={[T.meta, { textAlign: 'center', color: C.flame }]}>Use your @{campus.domain} email</Text>}
 
           <Button title="Continue" variant="accent" disabled={!valid} onPress={() => finish(p)} />
-          <Pressable onPress={() => finish({ ...ME })} style={{ alignSelf: 'center', padding: 4 }}>
+          <Pressable onPress={() => finish({ ...ME, demo: true })} style={{ alignSelf: 'center', padding: 4 }}>
             <Text style={T.meta}>Use demo profile</Text>
           </Pressable>
         </ScrollView>
