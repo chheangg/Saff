@@ -8138,6 +8138,326 @@
           "y": 760
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "pcbUR",
+      "x": 0,
+      "y": 1132,
+      "name": "Logo (on dark)",
+      "fill": "#00000000",
+      "gap": 28,
+      "padding": [
+        40,
+        60
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "pK9Mn",
+          "name": "Mark",
+          "width": 180,
+          "height": 180,
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "../assets/mascot/moon-wave.png",
+            "mode": "contain"
+          }
+        },
+        {
+          "type": "text",
+          "id": "y3zX2u",
+          "name": "Wordmark",
+          "fill": "#FFFFFF",
+          "content": "saff",
+          "fontFamily": "Geist",
+          "fontSize": 200,
+          "fontWeight": "700",
+          "letterSpacing": -10
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "KLmmU",
+      "x": 900,
+      "y": 1132,
+      "name": "Logo (on light)",
+      "fill": "#00000000",
+      "gap": 28,
+      "padding": [
+        40,
+        60
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "s9rj1q",
+          "name": "Mark",
+          "width": 180,
+          "height": 180,
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "../assets/mascot/moon-wave.png",
+            "mode": "contain"
+          }
+        },
+        {
+          "type": "text",
+          "id": "VJHaP",
+          "name": "Wordmark",
+          "fill": "#0B0B0F",
+          "content": "saff",
+          "fontFamily": "Geist",
+          "fontSize": 200,
+          "fontWeight": "700",
+          "letterSpacing": -10
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "D8h5R",
+      "x": 0,
+      "y": 1592,
+      "name": "End Card 16x9",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": [
+        {
+          "type": "gradient",
+          "gradientType": "linear",
+          "enabled": true,
+          "rotation": 135,
+          "size": {
+            "height": 1
+          },
+          "colors": [
+            {
+              "color": "#1E1B4B",
+              "position": 0
+            },
+            {
+              "color": "#4338CA",
+              "position": 0.6
+            },
+            {
+              "color": "#7C3AED",
+              "position": 1
+            }
+          ]
+        },
+        {
+          "type": "gradient",
+          "gradientType": "radial",
+          "enabled": true,
+          "rotation": 0,
+          "size": {
+            "width": 1,
+            "height": 1.2
+          },
+          "colors": [
+            {
+              "color": "#6EE7B755",
+              "position": 0
+            },
+            {
+              "color": "#6EE7B700",
+              "position": 1
+            }
+          ],
+          "center": {
+            "x": 0.85,
+            "y": 0.15
+          }
+        }
+      ],
+      "layout": "vertical",
+      "gap": 28,
+      "justifyContent": "center",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "nx1nB",
+          "name": "Lockup",
+          "gap": 28,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "TlhRQ",
+              "name": "Mark",
+              "width": 200,
+              "height": 200,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "../assets/mascot/moon-wave.png",
+                "mode": "contain"
+              }
+            },
+            {
+              "type": "text",
+              "id": "dqJOo",
+              "name": "Wordmark",
+              "fill": "#FFFFFF",
+              "content": "saff",
+              "fontFamily": "Geist",
+              "fontSize": 220,
+              "fontWeight": "700",
+              "letterSpacing": -11
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "O5lY0",
+          "name": "Tagline",
+          "fill": "#E0E7FF",
+          "content": "Pray together. Never alone.",
+          "fontFamily": "Geist",
+          "fontSize": 56,
+          "fontWeight": "500",
+          "letterSpacing": -1.5
+        },
+        {
+          "type": "text",
+          "id": "uaNKe",
+          "name": "Event",
+          "fill": "#A5B4FC",
+          "content": "DEEN & DUNYA · MTC × REPLIT × MANARA WEST",
+          "fontFamily": "Geist Mono",
+          "fontSize": 24,
+          "fontWeight": "normal",
+          "letterSpacing": 3
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "WiECC",
+      "x": 2040,
+      "y": 1592,
+      "name": "Title Card 16x9",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": [
+        {
+          "type": "gradient",
+          "gradientType": "linear",
+          "enabled": true,
+          "rotation": 135,
+          "size": {
+            "height": 1
+          },
+          "colors": [
+            {
+              "color": "#1E1B4B",
+              "position": 0
+            },
+            {
+              "color": "#4338CA",
+              "position": 0.6
+            },
+            {
+              "color": "#7C3AED",
+              "position": 1
+            }
+          ]
+        },
+        {
+          "type": "gradient",
+          "gradientType": "radial",
+          "enabled": true,
+          "rotation": 0,
+          "size": {
+            "width": 1,
+            "height": 1.2
+          },
+          "colors": [
+            {
+              "color": "#6EE7B755",
+              "position": 0
+            },
+            {
+              "color": "#6EE7B700",
+              "position": 1
+            }
+          ],
+          "center": {
+            "x": 0.85,
+            "y": 0.15
+          }
+        }
+      ],
+      "layout": "vertical",
+      "gap": 28,
+      "justifyContent": "center",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "bTGzc",
+          "name": "Lockup",
+          "gap": 28,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "X46b0l",
+              "name": "Mark",
+              "width": 200,
+              "height": 200,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "../assets/mascot/moon-wave.png",
+                "mode": "contain"
+              }
+            },
+            {
+              "type": "text",
+              "id": "wnPgc",
+              "name": "Wordmark",
+              "fill": "#FFFFFF",
+              "content": "saff",
+              "fontFamily": "Geist",
+              "fontSize": 220,
+              "fontWeight": "700",
+              "letterSpacing": -11
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "fSSrW",
+          "name": "Tagline",
+          "fill": "#E0E7FF",
+          "content": "When the adhan goes off, find who's free to pray.",
+          "fontFamily": "Geist",
+          "fontSize": 56,
+          "fontWeight": "500",
+          "letterSpacing": -1.5
+        },
+        {
+          "type": "text",
+          "id": "Ow2NG",
+          "name": "Event",
+          "fill": "#A5B4FC",
+          "content": "UC SAN DIEGO",
+          "fontFamily": "Geist Mono",
+          "fontSize": 24,
+          "fontWeight": "normal",
+          "letterSpacing": 3
+        }
+      ]
     }
   ],
   "themes": {

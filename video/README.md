@@ -1,5 +1,28 @@
 # Saff: 60-second video
 
+## Upload footage (do this)
+
+1. iPhone → Photos (clips) and Voice Memos (the memo) → **Share → AirDrop →** Evan's Mac. Files land in Downloads.
+2. Drag everything into **`video/raw/inbox/`**. Any names are fine.
+3. Tell Claude **"footage is in"**.
+
+**Screen recordings: turn the mic ON** (Control Center → long-press Screen Recording → Microphone). The walking camera and the phone then hear the same street, so `analyze.mjs` syncs them to the frame. With the mic off, it falls back to the clips' recording timestamps, which are close but not frame-exact.
+
+## The edit layout (16:9, 1920×1080)
+
+1. **Scene 1:** Ibrahim studying, full frame. The **voice memo** replaces the camera audio, auto-synced by waveform.
+2. **Scenes 2+:** **left half** = Ibrahim walking and using the app (cropped portrait). **Right half** = the phone screen recording, whole, with rounded corners on the dark canvas. Both play in sync.
+3. Burned-in captions from the voice (whisper.cpp, on this Mac), title card, end card with the logo.
+
+**Pipeline (Claude runs it):** `node video/tools/analyze.mjs` sorts the inbox by recording time, classifies each file (camera / screen / memo), and syncs memo↔camera and screen↔walk by sound. It writes `video/raw/plan.json`. Then Claude builds the kino project from the plan: imports, layout, captions (`add_captions speech`, fixing "SAF" → "Saff"), title/end cards, music ducked under the voice, and renders to `video/exports/`.
+
+**Music:** many in the MSA avoid instrumental music, so the **default is no music**: voice, natural sound, and a soft whoosh on the cuts. If the team wants a bed anyway, kino's licensed library (Kevin MacLeod, CC BY 4.0, credit in the end card) fits "Angel Share" (uplifting, calm, 85 bpm) or "Eternity" (lofi, calm). A vocals-only nasheed dropped into `video/music/` also works. Say which.
+
+**Brand assets:** `assets/brand/` has `logo-on-dark.png`, `logo-on-light.png`, `title-card-16x9.png`, and `end-card-16x9.png` (from `design/saff.pen`).
+
+---
+
+
 **Ibrahim records** (himself plus his phone screen). **Claude edits** with **kino**, a local motion engine connected to Claude Code over MCP. Drop footage in `raw/`, then ask Claude to cut it.
 
 ```
