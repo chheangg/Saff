@@ -157,6 +157,13 @@ io.on('connection', (socket) => {
     save();
     const room = roomOf(u);
     if (socket.data.room && socket.data.room !== room) socket.leave(socket.data.room);
+    // No free mixing: a user is only ever listed in their own campus+gender group. If they
+    // switched gender or campus (even from another device), drop them from every other group.
+    for (const [r, g] of groups) {
+      if (r === room || !g.members.includes(u.id)) continue;
+      g.members = g.members.filter((id) => id !== u.id);
+      emitGroup(r);
+    }
     socket.data.id = u.id;
     socket.data.room = room;
     socket.join(room);

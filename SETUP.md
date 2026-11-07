@@ -96,6 +96,8 @@ state = {
 
 Groups are per **campus + gender** (for example `ucsd:brother`). An adhan opens a fresh group that lasts 30 min.
 
+**No free mixing (hard rule):** brothers only ever see brothers, and sisters only ever see sisters. That covers group lists, profiles and chat messages. If someone changes gender or campus, the server removes them from their old group. `cd server && npm test` checks this with fake phones; run it before pushing any server change. Gender is self-reported at onboarding, so the app can't verify it.
+
 | Direction | Event | Payload |
 | --- | --- | --- |
 | app → server | `join` | `{ id, name, gender: 'brother'\|'sister', campus: 'ucsd'\|'sdsu'\|'mesa'\|'usd', major, year, linkedin, instagram, streak, prayedToday }`. Sent on connect, after onboarding, and when gender changes; `id` is the device id from `persist.js` |
